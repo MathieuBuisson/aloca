@@ -1,0 +1,32 @@
+name: CI-CD
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  CI-CD:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required for creating releases
+      actions: write   # Required for uploading release assets
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v6
+
+    # - name: Increment version
+    #   uses: saleweaver/version_increment_action@v1
+    #   with:
+    #     file_path: "version.txt"
+    #     version_key: "__version__"
+
+    # - name: Create a release
+    #   if: env.new_version != ''
+    #   uses: softprops/action-gh-release@v3
+    #   with:
+    #     tag_name: v${{ env.new_version }}
+    #     name: v${{ env.new_version }}
