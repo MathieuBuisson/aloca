@@ -73,8 +73,20 @@ async function fetchYahooRaw(ticker: string): Promise<YahooRaw> {
 		throw new Error(`Yahoo Finance ${res.status} for "${ticker}"`);
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const data = (await res.json()) as any;
+	interface YahooResponse {
+		chart: {
+			result?: Array<{
+				meta: {
+					regularMarketPrice: number;
+					previousClose?: number;
+					chartPreviousClose?: number;
+					currency: string;
+				};
+			}>;
+		};
+	}
+
+	const data = (await res.json()) as YahooResponse;
 	const meta = data?.chart?.result?.[0]?.meta;
 	if (!meta) throw new Error(`No data returned for "${ticker}"`);
 
