@@ -1,5 +1,5 @@
+import { join } from "node:path";
 import { serve } from "bun";
-import { join } from "path";
 
 const PORT = 8000;
 const CACHE_TTL_MS = 60_000;

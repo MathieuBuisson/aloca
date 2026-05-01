@@ -531,8 +531,8 @@ const CHART_DEFAULTS = {
 const fmt = (v, d = 2) =>
   new Intl.NumberFormat('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d }).format(v);
 
-const fmtEur = (v) => '€\u202f' + fmt(v);
-const fmtPct = (v) => (v >= 0 ? '+' : '') + fmt(v, 2) + '%';
+const fmtEur = (v) => `€\u202f${fmt(v)}`;
+const fmtPct = (v) => `${(v >= 0 ? '+' : '') + fmt(v, 2)}%`;
 const fmtSign = (v) => (v >= 0 ? '+' : '') + fmtEur(v);
 
 // ─── Chart registry ──────────────────────────────────────────────────────────
@@ -587,7 +587,7 @@ function renderBarChart(id, labels, actualPcts, targetPcts) {
         {
           label: 'Actual',
           data: actualPcts,
-          backgroundColor: barColors.map(c => c + 'cc'),
+          backgroundColor: barColors.map(c => `${c}cc`),
           borderColor: barColors,
           borderWidth: 1,
           borderRadius: 5,
@@ -617,7 +617,7 @@ function renderBarChart(id, labels, actualPcts, targetPcts) {
           ticks: {
             color: '#5a5a7a',
             font: { family: 'DM Mono', size: 10 },
-            callback: (v) => v + '%',
+            callback: (v) => `${v}%`,
           },
           max: Math.ceil(Math.max(...actualPcts, ...targetPcts) / 10) * 10 + 10,
           min: 0,
@@ -642,7 +642,7 @@ function renderBarChart(id, labels, actualPcts, targetPcts) {
 }
 
 // ─── Legend helper ────────────────────────────────────────────────────────────
-function renderLegend(containerId, labels, pcts, colors, vertical = false) {
+function renderLegend(containerId, labels, pcts, colors, _vertical = false) {
   const el = document.getElementById(containerId);
   el.innerHTML = labels.map((l, i) => `
     <div class="legend-item">
@@ -718,18 +718,18 @@ async function loadAll() {
 
     const pnlEl = document.getElementById('dailyPnl');
     pnlEl.textContent = fmtSign(totalPnl);
-    pnlEl.className   = 'kpi-value ' + (totalPnl >= 0 ? 'positive' : 'negative');
+    pnlEl.className   = `kpi-value ${totalPnl >= 0 ? 'positive' : 'negative'}`;
 
     const retEl = document.getElementById('dailyReturn');
     retEl.textContent = fmtPct(totalReturn);
-    retEl.className   = 'kpi-value ' + (totalReturn >= 0 ? 'positive' : 'negative');
+    retEl.className   = `kpi-value ${totalReturn >= 0 ? 'positive' : 'negative'}`;
 
     document.getElementById('numAssets').textContent = assets.length;
     document.getElementById('kpiSub4').textContent   =
-      Object.keys(targets).length + ' target classes';
+      `${Object.keys(targets).length} target classes`;
 
     document.getElementById('lastUpdated').textContent =
-      'Updated ' + new Date().toLocaleTimeString('fr-FR');
+      `Updated ${new Date().toLocaleTimeString('fr-FR')}`;
 
     // ── Asset class donut ─────────────────────────────────────────────────
     const byClass  = groupBy(enriched, 'asset_class', totalValue);
@@ -814,7 +814,7 @@ async function loadAll() {
   } catch (err) {
     const errEl = document.getElementById('errorBanner');
     errEl.style.display = 'block';
-    errEl.textContent   = '⚠  ' + err.message;
+    errEl.textContent   = `⚠  ${err.message}`;
     console.error(err);
   } finally {
     btn.disabled = false; btn.textContent = '↻ REFRESH';
