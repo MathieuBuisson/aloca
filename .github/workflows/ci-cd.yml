@@ -29,7 +29,10 @@ jobs:
 
     # ---- Biome (format + lint) ----
     - name: Biome check
-      run: npx -y @biomejs/biome ci .
+      run: npx biome ci .
+
+    - name: Type check
+      run: npx tsc --noEmit
 
     # - name: Increment version
     #   uses: saleweaver/version_increment_action@v1
