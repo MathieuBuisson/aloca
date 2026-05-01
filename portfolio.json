@@ -1,83 +1,83 @@
 {
-  "assets": [
-    {
-      "ticker": "VWCE.DE",
-      "name": "Vanguard FTSE All-World UCITS ETF",
-      "quantity": 50,
-      "asset_class": "Equities",
-      "platform": "DEGIRO",
-      "geography": "Global"
-    },
-    {
-      "ticker": "CSPX.L",
-      "name": "iShares Core S&P 500 UCITS ETF",
-      "quantity": 25,
-      "asset_class": "Equities",
-      "platform": "DEGIRO",
-      "geography": "US"
-    },
-    {
-      "ticker": "IS3N.DE",
-      "name": "iShares Core MSCI EM IMI UCITS ETF",
-      "quantity": 40,
-      "asset_class": "Equities",
-      "platform": "Trade Republic",
-      "geography": "Emerging Markets"
-    },
-    {
-      "ticker": "IBCL.DE",
-      "name": "iShares € Govt Bond 15-30yr UCITS ETF",
-      "quantity": 80,
-      "asset_class": "Bonds",
-      "platform": "DEGIRO",
-      "geography": "Europe"
-    },
-    {
-      "ticker": "AGGH.MI",
-      "name": "iShares Core Global Aggregate Bond UCITS ETF",
-      "quantity": 60,
-      "asset_class": "Bonds",
-      "platform": "Trade Republic",
-      "geography": "Global"
-    },
-    {
-      "ticker": "IPRP.AS",
-      "name": "iShares European Property Yield UCITS ETF",
-      "quantity": 55,
-      "asset_class": "Real Estate",
-      "platform": "DEGIRO",
-      "geography": "Europe"
-    },
-    {
-      "ticker": "bitcoin",
-      "name": "Bitcoin",
-      "quantity": 0.15,
-      "asset_class": "Crypto",
-      "platform": "Coinbase",
-      "geography": "Global"
-    },
-    {
-      "ticker": "ethereum",
-      "name": "Ethereum",
-      "quantity": 2.0,
-      "asset_class": "Crypto",
-      "platform": "Coinbase",
-      "geography": "Global"
-    },
-    {
-      "ticker": "solana",
-      "name": "Solana",
-      "quantity": 10,
-      "asset_class": "Crypto",
-      "platform": "Kraken",
-      "geography": "Global"
-    }
-  ],
-  "targets": {
-    "Equities": 0.55,
-    "Bonds": 0.15,
-    "Real Estate": 0.10,
-    "Crypto": 0.15,
-    "Cash": 0.05
-  }
+	"assets": [
+		{
+			"ticker": "VWCE.DE",
+			"name": "Vanguard FTSE All-World UCITS ETF",
+			"quantity": 50,
+			"asset_class": "Equities",
+			"platform": "DEGIRO",
+			"geography": "Global"
+		},
+		{
+			"ticker": "CSPX.L",
+			"name": "iShares Core S&P 500 UCITS ETF",
+			"quantity": 25,
+			"asset_class": "Equities",
+			"platform": "DEGIRO",
+			"geography": "US"
+		},
+		{
+			"ticker": "IS3N.DE",
+			"name": "iShares Core MSCI EM IMI UCITS ETF",
+			"quantity": 40,
+			"asset_class": "Equities",
+			"platform": "Trade Republic",
+			"geography": "Emerging Markets"
+		},
+		{
+			"ticker": "IBCL.DE",
+			"name": "iShares € Govt Bond 15-30yr UCITS ETF",
+			"quantity": 80,
+			"asset_class": "Bonds",
+			"platform": "DEGIRO",
+			"geography": "Europe"
+		},
+		{
+			"ticker": "AGGH.MI",
+			"name": "iShares Core Global Aggregate Bond UCITS ETF",
+			"quantity": 60,
+			"asset_class": "Bonds",
+			"platform": "Trade Republic",
+			"geography": "Global"
+		},
+		{
+			"ticker": "IPRP.AS",
+			"name": "iShares European Property Yield UCITS ETF",
+			"quantity": 55,
+			"asset_class": "Real Estate",
+			"platform": "DEGIRO",
+			"geography": "Europe"
+		},
+		{
+			"ticker": "bitcoin",
+			"name": "Bitcoin",
+			"quantity": 0.15,
+			"asset_class": "Crypto",
+			"platform": "Coinbase",
+			"geography": "Global"
+		},
+		{
+			"ticker": "ethereum",
+			"name": "Ethereum",
+			"quantity": 2.0,
+			"asset_class": "Crypto",
+			"platform": "Coinbase",
+			"geography": "Global"
+		},
+		{
+			"ticker": "solana",
+			"name": "Solana",
+			"quantity": 10,
+			"asset_class": "Crypto",
+			"platform": "Kraken",
+			"geography": "Global"
+		}
+	],
+	"targets": {
+		"Equities": 0.55,
+		"Bonds": 0.15,
+		"Real Estate": 0.1,
+		"Crypto": 0.15,
+		"Cash": 0.05
+	}
 }
