@@ -27,12 +27,16 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    # ---- Biome (format + lint) ----
+    # Biome (format + lint)
     - name: Biome check
       run: npx biome ci .
 
+    # TypeScript
     - name: Type check
       run: npx tsc --noEmit
+
+    - name: Run the test suite
+      run: npx bun test
 
     - name: Run Trivy vulnerability scanner
       uses: aquasecurity/trivy-action@v0.36.0
@@ -40,9 +44,6 @@ jobs:
         scan-type: fs
         format: table
         exit-code: 1
-
-    - name: Run the test suite
-      run: bun test
 
   semgrep:
     name: Semgrep Scan
