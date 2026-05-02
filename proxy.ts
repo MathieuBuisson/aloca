@@ -3,8 +3,7 @@ import { serve } from "bun";
 
 const isTest =
 	process.env.BUN_ENV === "test" || process.env.NODE_ENV === "test";
-// port 0 tells the OS to assign a random available port
-const PORT = isTest ? 0 : Number(process.env.ALOCA_PORT ?? 8000);
+const PORT = isTest ? 0 : Number(process.env.ALOCA_PORT ?? 8000); // 0 = OS-assigned ephemeral port
 const CACHE_TTL_MS = 60_000;
 const FX_CACHE_TTL_MS = 300_000; // FX rates cached for 5 minutes
 // Directory where portfolio.json lives — override with the PORTFOLIO_DIR env var.
@@ -40,12 +39,13 @@ export function clearCache(): void {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
+// Pause between Yahoo Finance requests to avoid rate-limiting
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 const USER_AGENTS = [
-	"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-	"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
-	"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+	"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
+	"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+	"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
 ];
 
 const randomUA = () =>
@@ -68,6 +68,19 @@ interface YahooRaw {
 	currency: string;
 }
 
+interface YahooResponse {
+	chart: {
+		result?: Array<{
+			meta: {
+				regularMarketPrice: number;
+				previousClose?: number;
+				chartPreviousClose?: number;
+				currency: string;
+			};
+		}>;
+	};
+}
+
 async function fetchYahooRaw(ticker: string): Promise<YahooRaw> {
 	const cacheKey = `yahoo:${ticker}`;
 	const cached = getCache<YahooRaw>(cacheKey);
@@ -87,29 +100,26 @@ async function fetchYahooRaw(ticker: string): Promise<YahooRaw> {
 		throw new Error(`Yahoo Finance ${res.status} for "${ticker}"`);
 	}
 
-	interface YahooResponse {
-		chart: {
-			result?: Array<{
-				meta: {
-					regularMarketPrice: number;
-					previousClose?: number;
-					chartPreviousClose?: number;
-					currency: string;
-				};
-			}>;
-		};
-	}
-
 	const data = (await res.json()) as YahooResponse;
 	const meta = data?.chart?.result?.[0]?.meta;
 	if (!meta) throw new Error(`No data returned for "${ticker}"`);
 
+	// Validate required numeric fields
+	if (
+		typeof meta.regularMarketPrice !== "number" ||
+		!Number.isFinite(meta.regularMarketPrice)
+	) {
+		throw new Error(`Invalid price for "${ticker}"`);
+	}
+	if (typeof meta.currency !== "string" || !meta.currency) {
+		throw new Error(`Invalid currency for "${ticker}"`);
+	}
+
 	const result: YahooRaw = {
-		price: meta.regularMarketPrice as number,
-		previousClose: (meta.previousClose ??
-			meta.chartPreviousClose ??
-			meta.regularMarketPrice) as number,
-		currency: meta.currency as string,
+		price: meta.regularMarketPrice,
+		previousClose:
+			meta.previousClose ?? meta.chartPreviousClose ?? meta.regularMarketPrice,
+		currency: meta.currency,
 	};
 
 	setCache(cacheKey, result);
@@ -162,39 +172,63 @@ export async function fetchCryptoBatch(
 	const cached = getCache<Map<string, NormalizedQuote>>(cacheKey);
 	if (cached) return cached;
 
-	const url = `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(
-		sortedKey,
-	)}&vs_currencies=eur&include_24hr_change=true`;
+	try {
+		const url = `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(
+			sortedKey,
+		)}&vs_currencies=eur&include_24hr_change=true`;
 
-	const res = await fetch(url, { headers: { Accept: "application/json" } });
-	if (!res.ok) throw new Error(`CoinGecko ${res.status}`);
+		const res = await fetch(url, { headers: { Accept: "application/json" } });
+		if (!res.ok) throw new Error(`CoinGecko ${res.status}`);
 
-	const data = (await res.json()) as Record<
-		string,
-		{ eur: number; eur_24h_change: number }
-	>;
+		const data = (await res.json()) as Record<
+			string,
+			{ eur: number; eur_24h_change: number }
+		>;
 
-	const result = new Map<string, NormalizedQuote>();
-	for (const id of coinIds) {
-		const v = data[id];
-		if (!v) {
-			result.set(id, {
+		const result = new Map<string, NormalizedQuote>();
+		for (const id of coinIds) {
+			const v = data[id];
+			if (!v) {
+				result.set(id, {
+					ticker: id,
+					priceEur: 0,
+					previousCloseEur: 0,
+					error: `CoinGecko: "${id}" not found`,
+				});
+				continue;
+			}
+			if (typeof v.eur !== "number" || !Number.isFinite(v.eur)) {
+				result.set(id, {
+					ticker: id,
+					priceEur: 0,
+					previousCloseEur: 0,
+					error: `Invalid price for "${id}"`,
+				});
+				continue;
+			}
+			const priceEur = v.eur;
+			const change = (v.eur_24h_change ?? 0) / 100;
+			// Reconstruct approximate previous price from rolling 24h change
+			const previousCloseEur = priceEur / Math.max(1 + change, 1e-9);
+			result.set(id, { ticker: id, priceEur, previousCloseEur });
+		}
+
+		setCache(cacheKey, result);
+		return result;
+	} catch (err) {
+		console.error("[crypto] batch fetch failed:", err);
+		// Return a Map with error objects for all requested coinIds
+		const errorMap = new Map<string, NormalizedQuote>();
+		for (const id of coinIds) {
+			errorMap.set(id, {
 				ticker: id,
 				priceEur: 0,
 				previousCloseEur: 0,
-				error: `CoinGecko: "${id}" not found`,
+				error: String(err),
 			});
-			continue;
 		}
-		const priceEur = v.eur;
-		const change = (v.eur_24h_change ?? 0) / 100;
-		// Reconstruct approximate previous price from rolling 24h change
-		const previousCloseEur = change !== -1 ? priceEur / (1 + change) : priceEur;
-		result.set(id, { ticker: id, priceEur, previousCloseEur });
+		return errorMap;
 	}
-
-	setCache(cacheKey, result);
-	return result;
 }
 
 // ─── Batch handler ────────────────────────────────────────────────────────────
@@ -206,19 +240,23 @@ export async function handleQuotesBatch(
 	const cryptoIds = tickers.filter((_, i) => types[i] === "crypto");
 	const stockTickers = tickers.filter((_, i) => types[i] !== "crypto");
 
-	// One CoinGecko call for all crypto
-	const cryptoMap =
+	// Start crypto fetch without blocking - runs concurrently with stock loop
+	const cryptoPromise =
 		cryptoIds.length > 0
-			? await fetchCryptoBatch(cryptoIds)
-			: new Map<string, NormalizedQuote>();
+			? fetchCryptoBatch(cryptoIds)
+			: Promise.resolve(new Map<string, NormalizedQuote>());
 
 	// Sequential Yahoo Finance calls with jitter to avoid throttling
+	// (runs in parallel with crypto fetch)
 	const stockMap = new Map<string, NormalizedQuote>();
 	for (let i = 0; i < stockTickers.length; i++) {
 		if (i > 0) await sleep(150 + Math.random() * 100);
 		const quote = await fetchStockQuote(stockTickers[i]);
 		stockMap.set(stockTickers[i], quote);
 	}
+
+	// Wait for crypto to complete
+	const cryptoMap = await cryptoPromise;
 
 	// Reassemble in original order
 	return tickers.map((ticker, i) => {
@@ -283,6 +321,7 @@ export const server = serve({
 				const typesParam = url.searchParams.get("types") ?? "";
 
 				if (!tickersParam) return json({ error: "missing tickers param" }, 400);
+				if (!typesParam) return json({ error: "missing types param" }, 400);
 
 				const tickers = tickersParam.split(",").map((t) => t.trim());
 				const types = typesParam.split(",").map((t) => t.trim());

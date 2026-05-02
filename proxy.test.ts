@@ -239,6 +239,20 @@ describe("fetchStockQuote", () => {
 		const q = await fetchStockQuote("NOPREV.DE");
 		expect(q.previousCloseEur).toBeCloseTo(55);
 	});
+
+	test("undefined regularMarketPrice — returns error quote", async () => {
+		globalThis.fetch = mock(
+			async () =>
+				new Response(
+					JSON.stringify({
+						chart: { result: [{ meta: { currency: "EUR" } }] },
+					}),
+				),
+		) as typeof globalThis.fetch;
+		const q = await fetchStockQuote("DELISTED.DE");
+		expect(q.priceEur).toBe(0);
+		expect(q.error).toContain("Invalid price");
+	});
 });
 
 // ─── Group 3: fetchCryptoBatch ────────────────────────────────────────────────
@@ -278,11 +292,13 @@ describe("fetchCryptoBatch", () => {
 		expect(coin?.error).toContain("fakecoin");
 	});
 
-	test("HTTP error from CoinGecko — throws", async () => {
+	test("HTTP error from CoinGecko — returns error Map for each coin", async () => {
 		globalThis.fetch = mock(
 			async () => new Response(null, { status: 429 }),
 		) as typeof globalThis.fetch;
-		expect(fetchCryptoBatch(["bitcoin"])).rejects.toThrow("429");
+		const result = await fetchCryptoBatch(["bitcoin", "ethereum"]);
+		expect(result.get("bitcoin")?.error).toContain("429");
+		expect(result.get("ethereum")?.error).toContain("429");
 	});
 
 	test("cache key is order-independent — second call is served from cache", async () => {
@@ -302,6 +318,13 @@ describe("fetchCryptoBatch", () => {
 		expect(
 			(globalThis.fetch as ReturnType<typeof mock>).mock.calls.length,
 		).toBe(callsAfterFirst);
+	});
+
+	test("undefined eur price — returns error for that coin", async () => {
+		mockExternalFetch({}, { bitcoin: { eur_24h_change: 1 } }); // missing 'eur'
+		const result = await fetchCryptoBatch(["bitcoin"]);
+		expect(result.get("bitcoin")?.priceEur).toBe(0);
+		expect(result.get("bitcoin")?.error).toContain("Invalid price");
 	});
 });
 
