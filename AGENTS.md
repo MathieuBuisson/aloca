@@ -21,6 +21,7 @@ All values are normalized to EUR. The dashboard shows:
   - Converts GBp to GBP for LSE-listed ETFs
   - Uses jitter (150-250ms) between Yahoo Finance requests to avoid throttling
   - Resolves portfolio.json from PORTFOLIO_DIR env var (defaults to the script's own directory)
+  - Port is configurable via ALOCA_PORT env var (defaults to 8000)
 
 - **Frontend**: `dashboard.html` — Single-page application with:
   - Embedded CSS (dark theme with accent colors)
@@ -36,6 +37,7 @@ All values are normalized to EUR. The dashboard shows:
 ```
 aloca/
 ├── proxy.ts              ← Bun server (backend)
+├── proxy.test.ts         ← Test suite for the backend
 ├── dashboard.html        ← Frontend (HTML/CSS/JS)
 ├── portfolio.json        ← User holdings config
 ├── README.md             ← User-facing documentation
@@ -51,6 +53,10 @@ aloca/
 - **TypeScript style**: The code follows the [Google TypeScript Style Guide](https://google.github.io/styleguide/tsguide.html).
 - **README accuracy**: Before any changes, confirm the README setup steps (Bun installation, running `bun run proxy.ts`, opening http://localhost:8000) reflect actual requirements.
 - **Code vs docs**: Verify the README description matches the codebase — especially the API endpoint format (`/quotes?tickers=...&types=...`), caching behavior, and crypto detection logic (`asset_class: "Crypto"` triggers CoinGecko).
+- **Test suite**:
+  - Run `bun test` to ensure no regressions were introduced.
+  - The test suite uses Bun's native `mock` to intercept external fetch calls and avoid network requests.
+  - During tests, the proxy server automatically binds to a random available port (port 0) to prevent conflicts with running instances.
 
 ## Trust these instructions
 

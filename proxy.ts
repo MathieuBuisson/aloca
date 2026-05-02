@@ -1,7 +1,10 @@
 import { join } from "node:path";
 import { serve } from "bun";
 
-const PORT = 8000;
+const isTest =
+	process.env.BUN_ENV === "test" || process.env.NODE_ENV === "test";
+// port 0 tells the OS to assign a random available port
+const PORT = isTest ? 0 : Number(process.env.ALOCA_PORT ?? 8000);
 const CACHE_TTL_MS = 60_000;
 const FX_CACHE_TTL_MS = 300_000; // FX rates cached for 5 minutes
 // Directory where portfolio.json lives — override with the PORTFOLIO_DIR env var.
@@ -16,14 +19,23 @@ interface CacheEntry {
 
 const cache = new Map<string, CacheEntry>();
 
-function getCache<T>(key: string): T | null {
+export function getCache<T>(key: string): T | null {
 	const entry = cache.get(key);
 	if (!entry || Date.now() > entry.expiresAt) return null;
 	return entry.value as T;
 }
 
-function setCache(key: string, value: unknown, ttl = CACHE_TTL_MS): void {
+export function setCache(
+	key: string,
+	value: unknown,
+	ttl = CACHE_TTL_MS,
+): void {
 	cache.set(key, { value, expiresAt: Date.now() + ttl });
+}
+
+/** Removes all cache entries. Intended for use in tests. */
+export function clearCache(): void {
+	cache.clear();
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -115,7 +127,9 @@ async function fetchFxRateToEur(currency: string): Promise<number> {
 	return raw.price;
 }
 
-async function fetchStockQuote(ticker: string): Promise<NormalizedQuote> {
+export async function fetchStockQuote(
+	ticker: string,
+): Promise<NormalizedQuote> {
 	try {
 		let { price, previousClose, currency } = await fetchYahooRaw(ticker);
 
@@ -140,7 +154,7 @@ async function fetchStockQuote(ticker: string): Promise<NormalizedQuote> {
 
 // ─── CoinGecko ────────────────────────────────────────────────────────────────
 
-async function fetchCryptoBatch(
+export async function fetchCryptoBatch(
 	coinIds: string[],
 ): Promise<Map<string, NormalizedQuote>> {
 	const sortedKey = [...coinIds].sort().join(",");
@@ -185,7 +199,7 @@ async function fetchCryptoBatch(
 
 // ─── Batch handler ────────────────────────────────────────────────────────────
 
-async function handleQuotesBatch(
+export async function handleQuotesBatch(
 	tickers: string[],
 	types: string[],
 ): Promise<NormalizedQuote[]> {
@@ -236,7 +250,7 @@ const JSON_HEADERS = {
 	"Content-Type": "application/json; charset=utf-8",
 };
 
-serve({
+export const server = serve({
 	port: PORT,
 	async fetch(req) {
 		const url = new URL(req.url);
@@ -289,7 +303,8 @@ serve({
 	},
 });
 
-console.log(`
+if (!isTest) {
+	console.log(`
   ┌─────────────────────────────────────┐
   │  Portfolio Dashboard                │
   │  → http://localhost:${PORT}           │
@@ -297,3 +312,4 @@ console.log(`
   │  Ctrl+C to stop                     │
   └─────────────────────────────────────┘
 `);
+}

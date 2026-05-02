@@ -72,6 +72,8 @@ Works in modern browsers (Chrome, Firefox, Safari, Edge).
 
 Set `PORTFOLIO_DIR` to the directory containing your `portfolio.json` if it differs from the directory where `proxy.ts` lives. When unset, it defaults to the `proxy.ts` directory.
 
+Set `ALOCA_PORT` to change the port the server binds to. When unset, it defaults to `8000`.
+
 Example (Linux/macOS):
 ```bash
 PORTFOLIO_DIR=/data/my-portfolio bun run proxy.ts
@@ -81,6 +83,14 @@ Example (Windows PowerShell):
 ```powershell
 $env:PORTFOLIO_DIR = "C:\\data\\my-portfolio"; bun run proxy.ts
 ```
+
+## Testing
+
+The project uses Bun's built-in test runner. To run the test suite:
+```bash
+bun test
+```
+*(Tests use an isolated mocked setup and will not conflict with the server if it's already running.)*
 
 ## Common Yahoo Finance ticker suffixes
 
