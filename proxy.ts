@@ -20,7 +20,10 @@ const cache = new Map<string, CacheEntry>();
 
 export function getCache<T>(key: string): T | null {
 	const entry = cache.get(key);
-	if (!entry || Date.now() > entry.expiresAt) return null;
+	if (!entry || Date.now() > entry.expiresAt) {
+		if (entry) cache.delete(key);
+		return null;
+	}
 	return entry.value as T;
 }
 
