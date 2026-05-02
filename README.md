@@ -68,6 +68,20 @@ Works in modern browsers (Chrome, Firefox, Safari, Edge).
 - **Rate limits**: CoinGecko free API ~10-30 calls/min; Yahoo Finance requests staggered with 150-250ms jitter to avoid throttling
 - **Error handling**: Failed price lookups display a warning icon (⚠) in the holdings table
 
+## Environment variables
+
+Set `PORTFOLIO_DIR` to the directory containing your `portfolio.json` if it differs from the directory where `proxy.ts` lives. When unset, it defaults to the `proxy.ts` directory.
+
+Example (Linux/macOS):
+```bash
+PORTFOLIO_DIR=/data/my-portfolio bun run proxy.ts
+```
+
+Example (Windows PowerShell):
+```powershell
+$env:PORTFOLIO_DIR = "C:\\data\\my-portfolio"; bun run proxy.ts
+```
+
 ## Common Yahoo Finance ticker suffixes
 
 | Exchange                | Suffix | Example       |

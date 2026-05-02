@@ -20,6 +20,7 @@ All values are normalized to EUR. The dashboard shows:
   - Handles caching (60s for prices, 5min for FX rates)
   - Converts GBp to GBP for LSE-listed ETFs
   - Uses jitter (150-250ms) between Yahoo Finance requests to avoid throttling
+  - Resolves portfolio.json from PORTFOLIO_DIR env var (defaults to the script's own directory)
 
 - **Frontend**: `dashboard.html` — Single-page application with:
   - Embedded CSS (dark theme with accent colors)

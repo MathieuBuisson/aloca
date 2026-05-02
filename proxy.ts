@@ -4,6 +4,8 @@ import { serve } from "bun";
 const PORT = 8000;
 const CACHE_TTL_MS = 60_000;
 const FX_CACHE_TTL_MS = 300_000; // FX rates cached for 5 minutes
+// Directory where portfolio.json lives — override with the PORTFOLIO_DIR env var.
+const PORTFOLIO_DIR = process.env.PORTFOLIO_DIR ?? import.meta.dir;
 
 // ─── Cache ────────────────────────────────────────────────────────────────────
 
@@ -255,7 +257,7 @@ serve({
 			// Serve portfolio config
 			if (url.pathname === "/portfolio") {
 				const text = await Bun.file(
-					join(import.meta.dir, "portfolio.json"),
+					join(PORTFOLIO_DIR, "portfolio.json"),
 				).text();
 				return new Response(text, { headers: JSON_HEADERS });
 			}
