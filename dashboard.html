@@ -1,35 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Portfolio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Figtree:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Figtree:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <script
+    src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"
+    integrity="sha384-e6nUZLBkQ86NJ6TVVKAeSaK8jWa3NhkYWZFomE39AvDbQWeie9PlQqM3pmYW5d1g"
+    crossorigin="anonymous">
+  </script>
   <style>
     :root {
-      --bg:          #08080e;
-      --surface:     #0f0f18;
-      --surface2:    #16161f;
-      --border:      #1c1c2e;
-      --border2:     #252540;
-      --text:        #e2e2ef;
-      --muted:       #5a5a7a;
-      --muted2:      #3a3a55;
-      --accent:      #e8a020;
-      --accent-dim:  rgba(232,160,32,0.10);
-      --accent-glow: rgba(232,160,32,0.06);
-      --positive:    #2dd4a0;
-      --negative:    #f06070;
-      --font-h:   'Syne', sans-serif;
-      --font-b:   'Figtree', sans-serif;
-      --font-m:   'DM Mono', monospace;
+      --bg: #08080e;
+      --surface: #0f0f18;
+      --surface2: #16161f;
+      --border: #1c1c2e;
+      --border2: #252540;
+      --text: #e2e2ef;
+      --muted: #5a5a7a;
+      --muted2: #3a3a55;
+      --accent: #e8a020;
+      --accent-dim: rgba(232, 160, 32, 0.10);
+      --accent-glow: rgba(232, 160, 32, 0.06);
+      --positive: #2dd4a0;
+      --negative: #f06070;
+      --font-h: 'Syne', sans-serif;
+      --font-b: 'Figtree', sans-serif;
+      --font-m: 'DM Mono', monospace;
     }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-    html { scroll-behavior: smooth; }
+    html {
+      scroll-behavior: smooth;
+    }
 
     body {
       background: var(--bg);
@@ -39,61 +54,83 @@
       min-height: 100vh;
       /* subtle grid */
       background-image:
-        linear-gradient(rgba(232,160,32,.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(232,160,32,.025) 1px, transparent 1px);
+        linear-gradient(rgba(232, 160, 32, .025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(232, 160, 32, .025) 1px, transparent 1px);
       background-size: 48px 48px;
     }
 
     /* ─── Header ─────────────────────────────────────────────────────── */
     header {
-      position: sticky; top: 0; z-index: 100;
-      display: flex; align-items: center; justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       padding: 18px 40px;
-      background: rgba(8,8,14,.85);
+      background: rgba(8, 8, 14, .85);
       backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border);
     }
 
     .logo {
-      display: flex; align-items: center; gap: 14px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
     }
 
     /* diamond made of two triangles */
     .logo-mark {
-      width: 22px; height: 22px;
+      width: 22px;
+      height: 22px;
       background: var(--accent);
       clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
     }
 
     .logo-text {
       font-family: var(--font-h);
-      font-size: 15px; font-weight: 700;
-      letter-spacing: .14em; text-transform: uppercase;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
       color: var(--text);
     }
 
     .header-right {
-      display: flex; align-items: center; gap: 20px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
     }
 
     .last-updated {
       font-family: var(--font-m);
-      font-size: 11px; color: var(--muted);
+      font-size: 11px;
+      color: var(--muted);
       letter-spacing: .05em;
     }
 
     .refresh-btn {
       background: var(--accent-dim);
-      border: 1px solid rgba(232,160,32,.25);
+      border: 1px solid rgba(232, 160, 32, .25);
       color: var(--accent);
       padding: 7px 16px;
       border-radius: 6px;
-      font-family: var(--font-m); font-size: 11px;
-      letter-spacing: .08em; cursor: pointer;
+      font-family: var(--font-m);
+      font-size: 11px;
+      letter-spacing: .08em;
+      cursor: pointer;
       transition: background .2s, border-color .2s;
     }
-    .refresh-btn:hover  { background: rgba(232,160,32,.18); border-color: rgba(232,160,32,.5); }
-    .refresh-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    .refresh-btn:hover {
+      background: rgba(232, 160, 32, .18);
+      border-color: rgba(232, 160, 32, .5);
+    }
+
+    .refresh-btn:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+    }
 
     /* ─── Layout ─────────────────────────────────────────────────────── */
     main {
@@ -104,12 +141,13 @@
 
     /* ─── Error banner ───────────────────────────────────────────────── */
     .error-banner {
-      background: rgba(240,96,112,.08);
-      border: 1px solid rgba(240,96,112,.3);
+      background: rgba(240, 96, 112, .08);
+      border: 1px solid rgba(240, 96, 112, .3);
       color: var(--negative);
       padding: 12px 18px;
       border-radius: 8px;
-      font-family: var(--font-m); font-size: 12px;
+      font-family: var(--font-m);
+      font-size: 12px;
       margin-bottom: 20px;
       display: none;
     }
@@ -127,49 +165,75 @@
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 24px 26px;
-      position: relative; overflow: hidden;
+      position: relative;
+      overflow: hidden;
       animation: fadeUp .35s ease both;
     }
 
     .kpi-card.primary {
-      border-color: rgba(232,160,32,.25);
-      background: linear-gradient(135deg, var(--surface) 60%, rgba(232,160,32,.06) 100%);
+      border-color: rgba(232, 160, 32, .25);
+      background: linear-gradient(135deg, var(--surface) 60%, rgba(232, 160, 32, .06) 100%);
     }
 
     /* top accent bar */
     .kpi-card::before {
       content: '';
-      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
       background: linear-gradient(90deg, transparent 0%, var(--accent) 50%, transparent 100%);
       opacity: 0;
     }
-    .kpi-card.primary::before { opacity: 1; }
+
+    .kpi-card.primary::before {
+      opacity: 1;
+    }
 
     .kpi-label {
       font-family: var(--font-m);
-      font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
-      color: var(--muted); margin-bottom: 14px;
+      font-size: 10px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
     }
 
     .kpi-value {
       font-family: var(--font-h);
-      font-size: 32px; font-weight: 700; line-height: 1;
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1;
       color: var(--text);
     }
-    .kpi-card.primary .kpi-value { font-size: 44px; color: var(--accent); }
+
+    .kpi-card.primary .kpi-value {
+      font-size: 44px;
+      color: var(--accent);
+    }
 
     .kpi-sub {
       font-family: var(--font-m);
-      font-size: 11px; color: var(--muted); margin-top: 10px;
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 10px;
     }
 
     /* ─── Charts grid ────────────────────────────────────────────────── */
     .charts-row {
-      display: grid; gap: 14px;
+      display: grid;
+      gap: 14px;
       margin-bottom: 14px;
     }
-    .charts-row.two   { grid-template-columns: 1fr 1fr; }
-    .charts-row.three { grid-template-columns: 1fr 1fr 1fr; }
+
+    .charts-row.two {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .charts-row.three {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
 
     .chart-card {
       background: var(--surface);
@@ -179,53 +243,70 @@
       animation: fadeUp .4s ease both;
     }
 
-    .chart-card.span2 { grid-column: span 2; }
+    .chart-card.span2 {
+      grid-column: span 2;
+    }
 
     .card-header {
-      display: flex; align-items: baseline; justify-content: space-between;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
       margin-bottom: 22px;
     }
 
     .card-title {
       font-family: var(--font-h);
-      font-size: 12px; font-weight: 600;
-      letter-spacing: .10em; text-transform: uppercase;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .10em;
+      text-transform: uppercase;
       color: var(--text);
     }
 
     .card-subtitle {
       font-family: var(--font-m);
-      font-size: 10px; color: var(--muted); letter-spacing: .05em;
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: .05em;
     }
 
     /* ─── Donut ──────────────────────────────────────────────────────── */
     .donut-wrap {
       position: relative;
-      max-width: 220px; margin: 0 auto;
+      max-width: 220px;
+      margin: 0 auto;
     }
 
     .donut-center {
-      position: absolute; top: 50%; left: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
       transform: translate(-50%, -50%);
-      text-align: center; pointer-events: none;
+      text-align: center;
+      pointer-events: none;
     }
 
     .donut-center-val {
       font-family: var(--font-h);
-      font-size: 24px; font-weight: 700;
-      color: var(--text); line-height: 1;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
     }
 
     .donut-center-lbl {
       font-family: var(--font-m);
-      font-size: 9px; color: var(--muted);
-      letter-spacing: .1em; text-transform: uppercase;
+      font-size: 9px;
+      color: var(--muted);
+      letter-spacing: .1em;
+      text-transform: uppercase;
       margin-top: 4px;
     }
 
     /* ─── Legend ─────────────────────────────────────────────────────── */
     .legend {
-      display: flex; flex-wrap: wrap;
+      display: flex;
+      flex-wrap: wrap;
       gap: 10px 16px;
       margin-top: 18px;
       justify-content: center;
@@ -234,27 +315,40 @@
     .legend.vertical {
       flex-direction: column;
       justify-content: flex-start;
-      margin-top: 0; gap: 12px;
+      margin-top: 0;
+      gap: 12px;
     }
 
     .legend-item {
-      display: flex; align-items: center; gap: 8px;
-      font-family: var(--font-m); font-size: 11px; color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-m);
+      font-size: 11px;
+      color: var(--muted);
     }
 
     .legend-dot {
-      width: 8px; height: 8px;
-      border-radius: 2px; flex-shrink: 0;
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      flex-shrink: 0;
     }
 
-    .legend-pct { color: var(--text); }
+    .legend-pct {
+      color: var(--text);
+    }
 
     /* ─── Geo layout (donut + legend side by side) ───────────────────── */
     .geo-layout {
-      display: flex; align-items: center; gap: 28px;
+      display: flex;
+      align-items: center;
+      gap: 28px;
     }
 
-    .geo-layout .donut-wrap { flex-shrink: 0; }
+    .geo-layout .donut-wrap {
+      flex-shrink: 0;
+    }
 
     /* ─── Holdings table ─────────────────────────────────────────────── */
     .holdings-card {
@@ -266,524 +360,605 @@
       animation: fadeUp .5s ease both;
     }
 
-    .table-wrap { overflow-x: auto; margin-top: 4px; }
+    .table-wrap {
+      overflow-x: auto;
+      margin-top: 4px;
+    }
 
     table {
-      width: 100%; border-collapse: collapse;
+      width: 100%;
+      border-collapse: collapse;
       min-width: 860px;
     }
 
     th {
       font-family: var(--font-m);
-      font-size: 9px; letter-spacing: .12em; text-transform: uppercase;
-      color: var(--muted); text-align: left;
+      font-size: 9px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: left;
       padding: 0 14px 12px;
       border-bottom: 1px solid var(--border);
       white-space: nowrap;
     }
-    th.r { text-align: right; }
+
+    th.r {
+      text-align: right;
+    }
 
     td {
       padding: 13px 14px;
       font-size: 13px;
-      border-bottom: 1px solid rgba(28,28,46,.6);
+      border-bottom: 1px solid rgba(28, 28, 46, .6);
       vertical-align: middle;
     }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: rgba(255,255,255,.015); }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, .015);
+    }
 
     .td-ticker {
-      font-family: var(--font-m); font-size: 12px;
-      color: var(--accent); font-weight: 500;
+      font-family: var(--font-m);
+      font-size: 12px;
+      color: var(--accent);
+      font-weight: 500;
     }
 
     .td-mono {
-      font-family: var(--font-m); font-size: 12px;
+      font-family: var(--font-m);
+      font-size: 12px;
       color: var(--muted);
     }
 
     .td-val {
-      font-family: var(--font-m); font-size: 13px;
+      font-family: var(--font-m);
+      font-size: 13px;
       text-align: right;
     }
 
-    .td-change { text-align: right; }
-    .td-change .main { font-family: var(--font-m); font-size: 12px; }
-    .td-change .sub  { font-family: var(--font-m); font-size: 10px; color: var(--muted); }
+    .td-change {
+      text-align: right;
+    }
+
+    .td-change .main {
+      font-family: var(--font-m);
+      font-size: 12px;
+    }
+
+    .td-change .sub {
+      font-family: var(--font-m);
+      font-size: 10px;
+      color: var(--muted);
+    }
 
     .badge {
       display: inline-block;
-      padding: 3px 8px; border-radius: 4px;
-      font-family: var(--font-m); font-size: 9px;
-      letter-spacing: .06em; text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-family: var(--font-m);
+      font-size: 9px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
       white-space: nowrap;
     }
 
     .weight-bar-wrap {
-      display: flex; align-items: center; justify-content: flex-end; gap: 8px;
-      font-family: var(--font-m); font-size: 11px; color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      font-family: var(--font-m);
+      font-size: 11px;
+      color: var(--muted);
     }
 
     .weight-bar-bg {
-      width: 44px; height: 3px;
-      background: var(--border2); border-radius: 2px; overflow: hidden;
+      width: 44px;
+      height: 3px;
+      background: var(--border2);
+      border-radius: 2px;
+      overflow: hidden;
     }
 
     .weight-bar-fill {
-      height: 100%; border-radius: 2px;
+      height: 100%;
+      border-radius: 2px;
     }
 
     /* ─── Colour helpers ─────────────────────────────────────────────── */
-    .positive { color: var(--positive); }
-    .negative { color: var(--negative); }
+    .positive {
+      color: var(--positive);
+    }
+
+    .negative {
+      color: var(--negative);
+    }
 
     /* ─── Error row ──────────────────────────────────────────────────── */
-    .error-row td { color: var(--muted); font-family: var(--font-m); font-size: 11px; }
+    .error-row td {
+      color: var(--muted);
+      font-family: var(--font-m);
+      font-size: 11px;
+    }
 
     /* ─── Loading ────────────────────────────────────────────────────── */
     .loading-row td {
-      font-family: var(--font-m); font-size: 11px;
-      color: var(--muted); letter-spacing: .08em;
-      text-align: center; padding: 32px;
+      font-family: var(--font-m);
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: .08em;
+      text-align: center;
+      padding: 32px;
     }
 
     /* ─── Animations ─────────────────────────────────────────────────── */
     @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(10px); }
-      to   { opacity: 1; transform: translateY(0);    }
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     @keyframes shimmer {
-      from { background-position: 200% 0; }
-      to   { background-position: -200% 0; }
+      from {
+        background-position: 200% 0;
+      }
+
+      to {
+        background-position: -200% 0;
+      }
     }
 
     /* stagger cards */
-    .kpi-card:nth-child(1) { animation-delay: .05s; }
-    .kpi-card:nth-child(2) { animation-delay: .10s; }
-    .kpi-card:nth-child(3) { animation-delay: .15s; }
-    .kpi-card:nth-child(4) { animation-delay: .20s; }
+    .kpi-card:nth-child(1) {
+      animation-delay: .05s;
+    }
+
+    .kpi-card:nth-child(2) {
+      animation-delay: .10s;
+    }
+
+    .kpi-card:nth-child(3) {
+      animation-delay: .15s;
+    }
+
+    .kpi-card:nth-child(4) {
+      animation-delay: .20s;
+    }
   </style>
 </head>
+
 <body>
 
-<!-- ─── Header ──────────────────────────────────────────────────────────── -->
-<header>
-  <div class="logo">
-    <div class="logo-mark"></div>
-    <span class="logo-text">Portfolio</span>
-  </div>
-  <div class="header-right">
-    <span class="last-updated" id="lastUpdated">—</span>
-    <button type="button" class="refresh-btn" id="refreshBtn" onclick="loadAll()">↻ REFRESH</button>
-  </div>
-</header>
-
-<main>
-
-  <div class="error-banner" id="errorBanner"></div>
-
-  <!-- KPI Row -->
-  <div class="kpi-row">
-    <div class="kpi-card primary">
-      <div class="kpi-label">Total Portfolio Value</div>
-      <div class="kpi-value" id="totalValue">—</div>
-      <div class="kpi-sub" id="kpiSub1">—</div>
+  <!-- ─── Header ──────────────────────────────────────────────────────────── -->
+  <header>
+    <div class="logo">
+      <div class="logo-mark"></div>
+      <span class="logo-text">Portfolio</span>
     </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Daily P&amp;L</div>
-      <div class="kpi-value" id="dailyPnl">—</div>
-      <div class="kpi-sub">vs. previous close</div>
+    <div class="header-right">
+      <span class="last-updated" id="lastUpdated">—</span>
+      <button type="button" class="refresh-btn" id="refreshBtn" onclick="loadAll()">↻ REFRESH</button>
     </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Daily Return</div>
-      <div class="kpi-value" id="dailyReturn">—</div>
-      <div class="kpi-sub">portfolio-wide</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Positions</div>
-      <div class="kpi-value" id="numAssets">—</div>
-      <div class="kpi-sub" id="kpiSub4">—</div>
-    </div>
-  </div>
+  </header>
 
-  <!-- Row 1: Asset class donut + Actual vs Target bar -->
-  <div class="charts-row two">
-    <div class="chart-card">
-      <div class="card-header">
-        <span class="card-title">Allocation — Asset Class</span>
-        <span class="card-subtitle">current</span>
+  <main>
+
+    <div class="error-banner" id="errorBanner"></div>
+
+    <!-- KPI Row -->
+    <div class="kpi-row">
+      <div class="kpi-card primary">
+        <div class="kpi-label">Total Portfolio Value</div>
+        <div class="kpi-value" id="totalValue">—</div>
+        <div class="kpi-sub" id="kpiSub1">—</div>
       </div>
-      <div class="donut-wrap">
-        <canvas id="classChart" height="220"></canvas>
-        <div class="donut-center">
-          <div class="donut-center-val" id="classCount">—</div>
-          <div class="donut-center-lbl">classes</div>
+      <div class="kpi-card">
+        <div class="kpi-label">Daily P&amp;L</div>
+        <div class="kpi-value" id="dailyPnl">—</div>
+        <div class="kpi-sub">vs. previous close</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Daily Return</div>
+        <div class="kpi-value" id="dailyReturn">—</div>
+        <div class="kpi-sub">portfolio-wide</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Positions</div>
+        <div class="kpi-value" id="numAssets">—</div>
+        <div class="kpi-sub" id="kpiSub4">—</div>
+      </div>
+    </div>
+
+    <!-- Row 1: Asset class donut + Actual vs Target bar -->
+    <div class="charts-row two">
+      <div class="chart-card">
+        <div class="card-header">
+          <span class="card-title">Allocation — Asset Class</span>
+          <span class="card-subtitle">current</span>
         </div>
-      </div>
-      <div class="legend" id="classLegend"></div>
-    </div>
-
-    <div class="chart-card">
-      <div class="card-header">
-        <span class="card-title">Actual vs Target</span>
-        <span class="card-subtitle">by asset class</span>
-      </div>
-      <canvas id="targetChart" height="220"></canvas>
-    </div>
-  </div>
-
-  <!-- Row 2: Platform donut + Geography (wider) -->
-  <div class="charts-row three">
-    <div class="chart-card">
-      <div class="card-header">
-        <span class="card-title">By Platform</span>
-        <span class="card-subtitle">account</span>
-      </div>
-      <div class="donut-wrap">
-        <canvas id="platformChart" height="220"></canvas>
-        <div class="donut-center">
-          <div class="donut-center-val" id="platformCount">—</div>
-          <div class="donut-center-lbl">platforms</div>
-        </div>
-      </div>
-      <div class="legend" id="platformLegend"></div>
-    </div>
-
-    <div class="chart-card span2">
-      <div class="card-header">
-        <span class="card-title">By Geography</span>
-        <span class="card-subtitle">exposure</span>
-      </div>
-      <div class="geo-layout">
-        <div class="donut-wrap" style="width:220px">
-          <canvas id="geoChart" height="220"></canvas>
+        <div class="donut-wrap">
+          <canvas id="classChart" height="220"></canvas>
           <div class="donut-center">
-            <div class="donut-center-val" id="geoCount">—</div>
-            <div class="donut-center-lbl">regions</div>
+            <div class="donut-center-val" id="classCount">—</div>
+            <div class="donut-center-lbl">classes</div>
           </div>
         </div>
-        <div class="legend vertical" id="geoLegend" style="flex:1"></div>
+        <div class="legend" id="classLegend"></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="card-header">
+          <span class="card-title">Actual vs Target</span>
+          <span class="card-subtitle">by asset class</span>
+        </div>
+        <canvas id="targetChart" height="220"></canvas>
       </div>
     </div>
-  </div>
 
-  <!-- Holdings table -->
-  <div class="holdings-card">
-    <div class="card-header">
-      <span class="card-title">Holdings</span>
-      <span class="card-subtitle" id="holdingsSubtitle">all positions</span>
+    <!-- Row 2: Platform donut + Geography (wider) -->
+    <div class="charts-row three">
+      <div class="chart-card">
+        <div class="card-header">
+          <span class="card-title">By Platform</span>
+          <span class="card-subtitle">account</span>
+        </div>
+        <div class="donut-wrap">
+          <canvas id="platformChart" height="220"></canvas>
+          <div class="donut-center">
+            <div class="donut-center-val" id="platformCount">—</div>
+            <div class="donut-center-lbl">platforms</div>
+          </div>
+        </div>
+        <div class="legend" id="platformLegend"></div>
+      </div>
+
+      <div class="chart-card span2">
+        <div class="card-header">
+          <span class="card-title">By Geography</span>
+          <span class="card-subtitle">exposure</span>
+        </div>
+        <div class="geo-layout">
+          <div class="donut-wrap" style="width:220px">
+            <canvas id="geoChart" height="220"></canvas>
+            <div class="donut-center">
+              <div class="donut-center-val" id="geoCount">—</div>
+              <div class="donut-center-lbl">regions</div>
+            </div>
+          </div>
+          <div class="legend vertical" id="geoLegend" style="flex:1"></div>
+        </div>
+      </div>
     </div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Ticker</th>
-            <th>Name</th>
-            <th>Class</th>
-            <th>Platform</th>
-            <th>Geography</th>
-            <th class="r">Qty</th>
-            <th class="r">Price (€)</th>
-            <th class="r">Value (€)</th>
-            <th class="r">Daily P&amp;L</th>
-            <th class="r">Weight</th>
-          </tr>
-        </thead>
-        <tbody id="holdingsBody">
-          <tr class="loading-row"><td colspan="10">LOADING POSITIONS…</td></tr>
-        </tbody>
-      </table>
+
+    <!-- Holdings table -->
+    <div class="holdings-card">
+      <div class="card-header">
+        <span class="card-title">Holdings</span>
+        <span class="card-subtitle" id="holdingsSubtitle">all positions</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Ticker</th>
+              <th>Name</th>
+              <th>Class</th>
+              <th>Platform</th>
+              <th>Geography</th>
+              <th class="r">Qty</th>
+              <th class="r">Price (€)</th>
+              <th class="r">Value (€)</th>
+              <th class="r">Daily P&amp;L</th>
+              <th class="r">Weight</th>
+            </tr>
+          </thead>
+          <tbody id="holdingsBody">
+            <tr class="loading-row">
+              <td colspan="10">LOADING POSITIONS…</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
 
-</main>
+  </main>
 
-<script>
-// ─── Palette ────────────────────────────────────────────────────────────────
-const CLASS_COLORS = {
-  'Equities':      '#60a5fa',
-  'Bonds':         '#34d399',
-  'Real Estate':   '#a78bfa',
-  'Crypto':        '#e8a020',
-  'Cash':          '#64748b',
-};
+  <script>
+    // ─── Palette ────────────────────────────────────────────────────────────────
+    const CLASS_COLORS = {
+      'Equities': '#60a5fa',
+      'Bonds': '#34d399',
+      'Real Estate': '#a78bfa',
+      'Crypto': '#e8a020',
+      'Cash': '#64748b',
+    };
 
-const PALETTE = [
-  '#e8a020','#60a5fa','#a78bfa','#34d399','#f87171',
-  '#fb923c','#38bdf8','#c084fc','#4ade80','#fbbf24',
-];
+    const PALETTE = [
+      '#e8a020', '#60a5fa', '#a78bfa', '#34d399', '#f87171',
+      '#fb923c', '#38bdf8', '#c084fc', '#4ade80', '#fbbf24',
+    ];
 
-const CHART_DEFAULTS = {
-  tooltip: {
-    backgroundColor: '#16161f',
-    borderColor:     '#252540',
-    borderWidth: 1,
-    titleColor: '#e2e2ef',
-    bodyColor:  '#5a5a7a',
-    titleFont:  { family: 'DM Mono', size: 11 },
-    bodyFont:   { family: 'DM Mono', size: 11 },
-    padding: 12,
-  },
-};
-
-// ─── Formatting ──────────────────────────────────────────────────────────────
-const fmt = (v, d = 2) =>
-  new Intl.NumberFormat('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d }).format(v);
-
-const fmtEur = (v) => `€\u202f${fmt(v)}`;
-const fmtPct = (v) => `${(v >= 0 ? '+' : '') + fmt(v, 2)}%`;
-const fmtSign = (v) => (v >= 0 ? '+' : '') + fmtEur(v);
-
-// ─── Chart registry ──────────────────────────────────────────────────────────
-const charts = {};
-
-function destroyChart(id) {
-  if (charts[id]) { charts[id].destroy(); delete charts[id]; }
-}
-
-// ─── Donut ───────────────────────────────────────────────────────────────────
-function renderDonut(id, labels, pcts, colors) {
-  destroyChart(id);
-  const ctx = document.getElementById(id).getContext('2d');
-  charts[id] = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels,
-      datasets: [{
-        data: pcts,
-        backgroundColor: colors,
-        borderColor: '#08080e',
-        borderWidth: 3,
-        hoverBorderWidth: 3,
-        hoverOffset: 4,
-      }],
-    },
-    options: {
-      cutout: '74%',
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          ...CHART_DEFAULTS.tooltip,
-          callbacks: { label: (c) => `  ${c.label}:  ${fmt(c.parsed, 1)}%` },
-        },
+    const CHART_DEFAULTS = {
+      tooltip: {
+        backgroundColor: '#16161f',
+        borderColor: '#252540',
+        borderWidth: 1,
+        titleColor: '#e2e2ef',
+        bodyColor: '#5a5a7a',
+        titleFont: { family: 'DM Mono', size: 11 },
+        bodyFont: { family: 'DM Mono', size: 11 },
+        padding: 12,
       },
-      animation: { animateRotate: true, duration: 550, easing: 'easeOutQuart' },
-    },
-  });
-}
+    };
 
-// ─── Bar chart (actual vs target) ────────────────────────────────────────────
-function renderBarChart(id, labels, actualPcts, targetPcts) {
-  destroyChart(id);
-  const ctx = document.getElementById(id).getContext('2d');
-  const barColors = labels.map(l => CLASS_COLORS[l] || PALETTE[0]);
+    // ─── Formatting ──────────────────────────────────────────────────────────────
+    const fmt = (v, d = 2) =>
+      new Intl.NumberFormat('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d }).format(v);
 
-  charts[id] = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        {
-          label: 'Actual',
-          data: actualPcts,
-          backgroundColor: barColors.map(c => `${c}cc`),
-          borderColor: barColors,
-          borderWidth: 1,
-          borderRadius: 5,
-          borderSkipped: false,
+    const fmtEur = (v) => `€\u202f${fmt(v)}`;
+    const fmtPct = (v) => `${(v >= 0 ? '+' : '') + fmt(v, 2)}%`;
+    const fmtSign = (v) => (v >= 0 ? '+' : '') + fmtEur(v);
+
+    // ─── Chart registry ──────────────────────────────────────────────────────────
+    const charts = {};
+
+    function destroyChart(id) {
+      if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+    }
+
+    // ─── Donut ───────────────────────────────────────────────────────────────────
+    function renderDonut(id, labels, pcts, colors) {
+      destroyChart(id);
+      const ctx = document.getElementById(id).getContext('2d');
+      charts[id] = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels,
+          datasets: [{
+            data: pcts,
+            backgroundColor: colors,
+            borderColor: '#08080e',
+            borderWidth: 3,
+            hoverBorderWidth: 3,
+            hoverOffset: 4,
+          }],
         },
-        {
-          label: 'Target',
-          data: targetPcts,
-          backgroundColor: 'transparent',
-          borderColor: barColors,
-          borderWidth: 2,
-          borderRadius: 5,
-          borderSkipped: false,
-          borderDash: [4, 3],
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      scales: {
-        x: {
-          grid: { color: 'rgba(28,28,46,.9)', drawBorder: false },
-          ticks: { color: '#5a5a7a', font: { family: 'DM Mono', size: 10 } },
-        },
-        y: {
-          grid: { color: 'rgba(28,28,46,.9)' },
-          ticks: {
-            color: '#5a5a7a',
-            font: { family: 'DM Mono', size: 10 },
-            callback: (v) => `${v}%`,
+        options: {
+          cutout: '74%',
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              ...CHART_DEFAULTS.tooltip,
+              callbacks: { label: (c) => `  ${c.label}:  ${fmt(c.parsed, 1)}%` },
+            },
           },
-          max: Math.ceil(Math.max(...actualPcts, ...targetPcts) / 10) * 10 + 10,
-          min: 0,
+          animation: { animateRotate: true, duration: 550, easing: 'easeOutQuart' },
         },
-      },
-      plugins: {
-        legend: {
-          labels: {
-            color: '#5a5a7a',
-            font: { family: 'DM Mono', size: 10 },
-            boxWidth: 10, boxHeight: 10,
-          },
-        },
-        tooltip: {
-          ...CHART_DEFAULTS.tooltip,
-          callbacks: { label: (c) => `  ${c.dataset.label}:  ${fmt(c.parsed.y, 1)}%` },
-        },
-      },
-      animation: { duration: 550, easing: 'easeOutQuart' },
-    },
-  });
-}
+      });
+    }
 
-// ─── Legend helper ────────────────────────────────────────────────────────────
-function renderLegend(containerId, labels, pcts, colors, _vertical = false) {
-  const el = document.getElementById(containerId);
-  el.innerHTML = labels.map((l, i) => `
+    // ─── Bar chart (actual vs target) ────────────────────────────────────────────
+    function renderBarChart(id, labels, actualPcts, targetPcts) {
+      destroyChart(id);
+      const ctx = document.getElementById(id).getContext('2d');
+      const barColors = labels.map(l => CLASS_COLORS[l] || PALETTE[0]);
+
+      charts[id] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Actual',
+              data: actualPcts,
+              backgroundColor: barColors.map(c => `${c}cc`),
+              borderColor: barColors,
+              borderWidth: 1,
+              borderRadius: 5,
+              borderSkipped: false,
+            },
+            {
+              label: 'Target',
+              data: targetPcts,
+              backgroundColor: 'transparent',
+              borderColor: barColors,
+              borderWidth: 2,
+              borderRadius: 5,
+              borderSkipped: false,
+              borderDash: [4, 3],
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              grid: { color: 'rgba(28,28,46,.9)', drawBorder: false },
+              ticks: { color: '#5a5a7a', font: { family: 'DM Mono', size: 10 } },
+            },
+            y: {
+              grid: { color: 'rgba(28,28,46,.9)' },
+              ticks: {
+                color: '#5a5a7a',
+                font: { family: 'DM Mono', size: 10 },
+                callback: (v) => `${v}%`,
+              },
+              max: Math.ceil(Math.max(...actualPcts, ...targetPcts) / 10) * 10 + 10,
+              min: 0,
+            },
+          },
+          plugins: {
+            legend: {
+              labels: {
+                color: '#5a5a7a',
+                font: { family: 'DM Mono', size: 10 },
+                boxWidth: 10, boxHeight: 10,
+              },
+            },
+            tooltip: {
+              ...CHART_DEFAULTS.tooltip,
+              callbacks: { label: (c) => `  ${c.dataset.label}:  ${fmt(c.parsed.y, 1)}%` },
+            },
+          },
+          animation: { duration: 550, easing: 'easeOutQuart' },
+        },
+      });
+    }
+
+    // ─── Legend helper ────────────────────────────────────────────────────────────
+    function renderLegend(containerId, labels, pcts, colors, _vertical = false) {
+      const el = document.getElementById(containerId);
+      el.innerHTML = labels.map((l, i) => `
     <div class="legend-item">
       <div class="legend-dot" style="background:${colors[i]}"></div>
       <span>${l}&ensp;<span class="legend-pct">${fmt(pcts[i], 1)}%</span></span>
     </div>
   `).join('');
-}
-
-// ─── Group by key ─────────────────────────────────────────────────────────────
-function groupBy(assets, key, total) {
-  const map = {};
-  for (const a of assets) {
-    const k = a[key] ?? 'Unknown';
-    map[k] = (map[k] ?? 0) + a.valueEur;
-  }
-  return Object.entries(map)
-    .sort(([, a], [, b]) => b - a)
-    .map(([label, value]) => ({ label, value, pct: total > 0 ? (value / total) * 100 : 0 }));
-}
-
-// ─── Main data loader ─────────────────────────────────────────────────────────
-async function loadAll() {
-  const btn = document.getElementById('refreshBtn');
-  btn.disabled = true; btn.textContent = '↻ LOADING';
-
-  const errEl = document.getElementById('errorBanner');
-  errEl.style.display = 'none';
-
-  try {
-    // 1. Portfolio config
-    const pfRes = await fetch('/portfolio');
-    if (!pfRes.ok) throw new Error(`Cannot load portfolio.json (${pfRes.status})`);
-    const { assets, targets } = await pfRes.json();
-
-    // 2. Batch quotes
-    const tickers = assets.map(a => a.ticker).join(',');
-    const types   = assets.map(a => a.asset_class === 'Crypto' ? 'crypto' : 'etf').join(',');
-
-    const qRes = await fetch(`/quotes?tickers=${encodeURIComponent(tickers)}&types=${encodeURIComponent(types)}`);
-    if (!qRes.ok) throw new Error(`Quotes endpoint error (${qRes.status})`);
-    const quotes = await qRes.json();
-
-    // 3. Build price map (ticker → { priceEur, previousCloseEur })
-    const priceMap = {};
-    for (const q of quotes) {
-      if (!q.error) priceMap[q.ticker] = { price: q.priceEur, prev: q.previousCloseEur };
     }
 
-    // 4. Enrich assets
-    let totalValue = 0, totalPrev = 0;
-    const enriched = assets.map(a => {
-      const p = priceMap[a.ticker];
-      const price   = p?.price ?? 0;
-      const prev    = p?.prev  ?? price;
-      const valueEur    = price * a.quantity;
-      const prevEur     = prev  * a.quantity;
-      const dailyPnl    = valueEur - prevEur;
-      const dailyReturn = prevEur > 0 ? (dailyPnl / prevEur) * 100 : 0;
-      const hasError    = !!quotes.find(q => q.ticker === a.ticker)?.error;
-      totalValue += valueEur;
-      totalPrev  += prevEur;
-      return { ...a, price, prev, valueEur, prevEur, dailyPnl, dailyReturn, hasError };
-    });
+    // ─── Group by key ─────────────────────────────────────────────────────────────
+    function groupBy(assets, key, total) {
+      const map = {};
+      for (const a of assets) {
+        const k = a[key] ?? 'Unknown';
+        map[k] = (map[k] ?? 0) + a.valueEur;
+      }
+      return Object.entries(map)
+        .sort(([, a], [, b]) => b - a)
+        .map(([label, value]) => ({ label, value, pct: total > 0 ? (value / total) * 100 : 0 }));
+    }
 
-    const totalPnl    = totalValue - totalPrev;
-    const totalReturn = totalPrev > 0 ? (totalPnl / totalPrev) * 100 : 0;
+    // ─── Main data loader ─────────────────────────────────────────────────────────
+    async function loadAll() {
+      const btn = document.getElementById('refreshBtn');
+      btn.disabled = true; btn.textContent = '↻ LOADING';
 
-    // ── KPIs ──────────────────────────────────────────────────────────────
-    document.getElementById('totalValue').textContent = fmtEur(totalValue);
-    document.getElementById('kpiSub1').textContent =
-      `${assets.length} positions · ${new Set(assets.map(a => a.platform)).size} platforms`;
+      const errEl = document.getElementById('errorBanner');
+      errEl.style.display = 'none';
 
-    const pnlEl = document.getElementById('dailyPnl');
-    pnlEl.textContent = fmtSign(totalPnl);
-    pnlEl.className   = `kpi-value ${totalPnl >= 0 ? 'positive' : 'negative'}`;
+      try {
+        // 1. Portfolio config
+        const pfRes = await fetch('/portfolio');
+        if (!pfRes.ok) throw new Error(`Cannot load portfolio.json (${pfRes.status})`);
+        const { assets, targets } = await pfRes.json();
 
-    const retEl = document.getElementById('dailyReturn');
-    retEl.textContent = fmtPct(totalReturn);
-    retEl.className   = `kpi-value ${totalReturn >= 0 ? 'positive' : 'negative'}`;
+        // 2. Batch quotes
+        const tickers = assets.map(a => a.ticker).join(',');
+        const types = assets.map(a => a.asset_class === 'Crypto' ? 'crypto' : 'etf').join(',');
 
-    document.getElementById('numAssets').textContent = assets.length;
-    document.getElementById('kpiSub4').textContent   =
-      `${Object.keys(targets).length} target classes`;
+        const qRes = await fetch(`/quotes?tickers=${encodeURIComponent(tickers)}&types=${encodeURIComponent(types)}`);
+        if (!qRes.ok) throw new Error(`Quotes endpoint error (${qRes.status})`);
+        const quotes = await qRes.json();
 
-    document.getElementById('lastUpdated').textContent =
-      `Updated ${new Date().toLocaleTimeString('fr-FR')}`;
+        // 3. Build price map (ticker → { priceEur, previousCloseEur })
+        const priceMap = {};
+        for (const q of quotes) {
+          if (!q.error) priceMap[q.ticker] = { price: q.priceEur, prev: q.previousCloseEur };
+        }
 
-    // ── Asset class donut ─────────────────────────────────────────────────
-    const byClass  = groupBy(enriched, 'asset_class', totalValue);
-    const clLabels = byClass.map(g => g.label);
-    const clPcts   = byClass.map(g => g.pct);
-    const clColors = clLabels.map(l => CLASS_COLORS[l] || PALETTE[clLabels.indexOf(l) % PALETTE.length]);
+        // 4. Enrich assets
+        let totalValue = 0, totalPrev = 0;
+        const enriched = assets.map(a => {
+          const p = priceMap[a.ticker];
+          const price = p?.price ?? 0;
+          const prev = p?.prev ?? price;
+          const valueEur = price * a.quantity;
+          const prevEur = prev * a.quantity;
+          const dailyPnl = valueEur - prevEur;
+          const dailyReturn = prevEur > 0 ? (dailyPnl / prevEur) * 100 : 0;
+          const hasError = !!quotes.find(q => q.ticker === a.ticker)?.error;
+          totalValue += valueEur;
+          totalPrev += prevEur;
+          return { ...a, price, prev, valueEur, prevEur, dailyPnl, dailyReturn, hasError };
+        });
 
-    renderDonut('classChart', clLabels, clPcts, clColors);
-    renderLegend('classLegend', clLabels, clPcts, clColors);
-    document.getElementById('classCount').textContent = byClass.length;
+        const totalPnl = totalValue - totalPrev;
+        const totalReturn = totalPrev > 0 ? (totalPnl / totalPrev) * 100 : 0;
 
-    // ── Actual vs Target bar ──────────────────────────────────────────────
-    const allClasses = [...new Set([...Object.keys(targets), ...clLabels])];
-    const actualPcts = allClasses.map(c => byClass.find(g => g.label === c)?.pct ?? 0);
-    const targetPcts = allClasses.map(c => (targets[c] ?? 0) * 100);
-    renderBarChart('targetChart', allClasses, actualPcts, targetPcts);
+        // ── KPIs ──────────────────────────────────────────────────────────────
+        document.getElementById('totalValue').textContent = fmtEur(totalValue);
+        document.getElementById('kpiSub1').textContent =
+          `${assets.length} positions · ${new Set(assets.map(a => a.platform)).size} platforms`;
 
-    // ── Platform donut ────────────────────────────────────────────────────
-    const byPlat  = groupBy(enriched, 'platform', totalValue);
-    const plLabels = byPlat.map(g => g.label);
-    const plPcts   = byPlat.map(g => g.pct);
-    const plColors = plLabels.map((_, i) => PALETTE[(i + 1) % PALETTE.length]);
+        const pnlEl = document.getElementById('dailyPnl');
+        pnlEl.textContent = fmtSign(totalPnl);
+        pnlEl.className = `kpi-value ${totalPnl >= 0 ? 'positive' : 'negative'}`;
 
-    renderDonut('platformChart', plLabels, plPcts, plColors);
-    renderLegend('platformLegend', plLabels, plPcts, plColors);
-    document.getElementById('platformCount').textContent = byPlat.length;
+        const retEl = document.getElementById('dailyReturn');
+        retEl.textContent = fmtPct(totalReturn);
+        retEl.className = `kpi-value ${totalReturn >= 0 ? 'positive' : 'negative'}`;
 
-    // ── Geography donut ───────────────────────────────────────────────────
-    const byGeo   = groupBy(enriched, 'geography', totalValue);
-    const gLabels = byGeo.map(g => g.label);
-    const gPcts   = byGeo.map(g => g.pct);
-    const gColors = gLabels.map((_, i) => PALETTE[(i + 4) % PALETTE.length]);
+        document.getElementById('numAssets').textContent = assets.length;
+        document.getElementById('kpiSub4').textContent =
+          `${Object.keys(targets).length} target classes`;
 
-    renderDonut('geoChart', gLabels, gPcts, gColors);
-    renderLegend('geoLegend', gLabels, gPcts, gColors, true);
-    document.getElementById('geoCount').textContent = byGeo.length;
+        document.getElementById('lastUpdated').textContent =
+          `Updated ${new Date().toLocaleTimeString('fr-FR')}`;
 
-    // ── Holdings table ────────────────────────────────────────────────────
-    const sorted = [...enriched].sort((a, b) => b.valueEur - a.valueEur);
-    const tbody  = document.getElementById('holdingsBody');
-    document.getElementById('holdingsSubtitle').textContent =
-      `${sorted.length} positions · sorted by value`;
+        // ── Asset class donut ─────────────────────────────────────────────────
+        const byClass = groupBy(enriched, 'asset_class', totalValue);
+        const clLabels = byClass.map(g => g.label);
+        const clPcts = byClass.map(g => g.pct);
+        const clColors = clLabels.map(l => CLASS_COLORS[l] || PALETTE[clLabels.indexOf(l) % PALETTE.length]);
 
-    tbody.innerHTML = sorted.map(a => {
-      const weight = totalValue > 0 ? (a.valueEur / totalValue) * 100 : 0;
-      const clr    = CLASS_COLORS[a.asset_class] || PALETTE[0];
-      const qty    = fmt(a.quantity, a.quantity < 1 ? 6 : 3);
-      const sign   = a.dailyPnl >= 0 ? 'positive' : 'negative';
+        renderDonut('classChart', clLabels, clPcts, clColors);
+        renderLegend('classLegend', clLabels, clPcts, clColors);
+        document.getElementById('classCount').textContent = byClass.length;
 
-      const errMark = a.hasError
-        ? `<span title="Price unavailable" style="color:var(--negative);margin-left:4px">⚠</span>`
-        : '';
+        // ── Actual vs Target bar ──────────────────────────────────────────────
+        const allClasses = [...new Set([...Object.keys(targets), ...clLabels])];
+        const actualPcts = allClasses.map(c => byClass.find(g => g.label === c)?.pct ?? 0);
+        const targetPcts = allClasses.map(c => (targets[c] ?? 0) * 100);
+        renderBarChart('targetChart', allClasses, actualPcts, targetPcts);
 
-      return `<tr>
+        // ── Platform donut ────────────────────────────────────────────────────
+        const byPlat = groupBy(enriched, 'platform', totalValue);
+        const plLabels = byPlat.map(g => g.label);
+        const plPcts = byPlat.map(g => g.pct);
+        const plColors = plLabels.map((_, i) => PALETTE[(i + 1) % PALETTE.length]);
+
+        renderDonut('platformChart', plLabels, plPcts, plColors);
+        renderLegend('platformLegend', plLabels, plPcts, plColors);
+        document.getElementById('platformCount').textContent = byPlat.length;
+
+        // ── Geography donut ───────────────────────────────────────────────────
+        const byGeo = groupBy(enriched, 'geography', totalValue);
+        const gLabels = byGeo.map(g => g.label);
+        const gPcts = byGeo.map(g => g.pct);
+        const gColors = gLabels.map((_, i) => PALETTE[(i + 4) % PALETTE.length]);
+
+        renderDonut('geoChart', gLabels, gPcts, gColors);
+        renderLegend('geoLegend', gLabels, gPcts, gColors, true);
+        document.getElementById('geoCount').textContent = byGeo.length;
+
+        // ── Holdings table ────────────────────────────────────────────────────
+        const sorted = [...enriched].sort((a, b) => b.valueEur - a.valueEur);
+        const tbody = document.getElementById('holdingsBody');
+        document.getElementById('holdingsSubtitle').textContent =
+          `${sorted.length} positions · sorted by value`;
+
+        tbody.innerHTML = sorted.map(a => {
+          const weight = totalValue > 0 ? (a.valueEur / totalValue) * 100 : 0;
+          const clr = CLASS_COLORS[a.asset_class] || PALETTE[0];
+          const qty = fmt(a.quantity, a.quantity < 1 ? 6 : 3);
+          const sign = a.dailyPnl >= 0 ? 'positive' : 'negative';
+
+          const errMark = a.hasError
+            ? `<span title="Price unavailable" style="color:var(--negative);margin-left:4px">⚠</span>`
+            : '';
+
+          return `<tr>
         <td class="td-ticker">${a.ticker.toUpperCase()}${errMark}</td>
         <td style="font-size:12px;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.name}</td>
         <td>
@@ -803,26 +978,27 @@ async function loadAll() {
         <td>
           <div class="weight-bar-wrap">
             <div class="weight-bar-bg">
-              <div class="weight-bar-fill" style="width:${Math.min(weight,100)}%;background:${clr}"></div>
+              <div class="weight-bar-fill" style="width:${Math.min(weight, 100)}%;background:${clr}"></div>
             </div>
             ${fmt(weight, 1)}%
           </div>
         </td>
       </tr>`;
-    }).join('');
+        }).join('');
 
-  } catch (err) {
-    const errEl = document.getElementById('errorBanner');
-    errEl.style.display = 'block';
-    errEl.textContent   = `⚠  ${err.message}`;
-    console.error(err);
-  } finally {
-    btn.disabled = false; btn.textContent = '↻ REFRESH';
-  }
-}
+      } catch (err) {
+        const errEl = document.getElementById('errorBanner');
+        errEl.style.display = 'block';
+        errEl.textContent = `⚠  ${err.message}`;
+        console.error(err);
+      } finally {
+        btn.disabled = false; btn.textContent = '↻ REFRESH';
+      }
+    }
 
-// Initial load
-loadAll();
-</script>
+    // Initial load
+    loadAll();
+  </script>
 </body>
+
 </html>
