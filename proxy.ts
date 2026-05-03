@@ -287,6 +287,7 @@ export async function handleQuotesBatch(
 // ─── Server ───────────────────────────────────────────────────────────────────
 
 const JSON_HEADERS = {
+	// Wildcard OK — local-only dashboard, no auth required
 	"Access-Control-Allow-Origin": "*",
 	"Content-Type": "application/json; charset=utf-8",
 };
