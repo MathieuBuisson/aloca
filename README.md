@@ -17,10 +17,11 @@ powershell -c "irm bun.sh/install.ps1|iex"
 ## File structure
 
 ```
-portfolio-dashboard/
+aloca/
 ├── proxy.ts            ← Bun server (serves dashboard + proxies price APIs)
 ├── dashboard.html      ← Frontend (served by the proxy)
 ├── portfolio.json      ← Your holdings — edit this
+├── tsconfig.json       ← TypeScript configuration
 ├── .github/workflows/  ← CI/CD pipeline
 └── README.md
 ```
@@ -91,6 +92,15 @@ The project uses Bun's built-in test runner. To run the test suite:
 bun test
 ```
 *(Tests use an isolated mocked setup and will not conflict with the server if it's already running.)*
+
+## Validation
+
+Run these commands before committing:
+```bash
+npx biome ci .
+npx tsc --noEmit
+bun test
+```
 
 ## Common Yahoo Finance ticker suffixes
 

@@ -4,16 +4,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Portfolio</title>
+  <title>Aloca — Portfolio Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
   <link
     href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Figtree:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap"
     rel="stylesheet" />
-  <script
-    src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"
-    integrity="sha384-e6nUZLBkQ86NJ6TVVKAeSaK8jWa3NhkYWZFomE39AvDbQWeie9PlQqM3pmYW5d1g"
-    crossorigin="anonymous">
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"
+    integrity="sha384-e6nUZLBkQ86NJ6TVVKAeSaK8jWa3NhkYWZFomE39AvDbQWeie9PlQqM3pmYW5d1g" crossorigin="anonymous">
+    </script>
   <style>
     :root {
       --bg: #08080e;
@@ -220,6 +219,10 @@
       margin-top: 10px;
     }
 
+    .kpi-sub .warning {
+      color: var(--negative);
+    }
+
     /* ─── Charts grid ────────────────────────────────────────────────── */
     .charts-row {
       display: grid;
@@ -415,10 +418,22 @@
       color: var(--muted);
     }
 
+    .td-name {
+      font-size: 12px;
+      max-width: 220px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
     .td-val {
       font-family: var(--font-m);
       font-size: 13px;
       text-align: right;
+    }
+
+    .td-val-bold {
+      font-weight: 500;
     }
 
     .td-change {
@@ -535,6 +550,25 @@
     .kpi-card:nth-child(4) {
       animation-delay: .20s;
     }
+
+    @media (max-width: 900px) {
+      .kpi-row {
+        grid-template-columns: 1fr;
+      }
+
+      .charts-row.two,
+      .charts-row.three {
+        grid-template-columns: 1fr;
+      }
+
+      .geo-layout {
+        flex-direction: column;
+      }
+
+      .geo-layout .legend {
+        margin-top: 18px;
+      }
+    }
   </style>
 </head>
 
@@ -544,11 +578,11 @@
   <header>
     <div class="logo">
       <div class="logo-mark"></div>
-      <span class="logo-text">Portfolio</span>
+      <span class="logo-text">Aloca — Portfolio Dashboard</span>
     </div>
     <div class="header-right">
       <span class="last-updated" id="lastUpdated">—</span>
-      <button type="button" class="refresh-btn" id="refreshBtn" onclick="loadAll()">↻ REFRESH</button>
+      <button type="button" class="refresh-btn" id="refreshBtn">↻ REFRESH</button>
     </div>
   </header>
 
@@ -636,7 +670,7 @@
               <div class="donut-center-lbl">regions</div>
             </div>
           </div>
-          <div class="legend vertical" id="geoLegend" style="flex:1"></div>
+          <div class="legend" id="geoLegend" style="flex:1"></div>
         </div>
       </div>
     </div>
@@ -794,7 +828,9 @@
                 font: { family: 'DM Mono', size: 10 },
                 callback: (v) => `${v}%`,
               },
-              max: Math.ceil(Math.max(...actualPcts, ...targetPcts) / 10) * 10 + 10,
+              max: (actualPcts.length || targetPcts.length)
+                ? Math.ceil(Math.max(...actualPcts, ...targetPcts) / 10) * 10 + 10
+                : 100,
               min: 0,
             },
           },
@@ -817,14 +853,30 @@
     }
 
     // ─── Legend helper ────────────────────────────────────────────────────────────
-    function renderLegend(containerId, labels, pcts, colors, _vertical = false) {
+    function renderLegend(containerId, labels, pcts, colors, vertical = false) {
       const el = document.getElementById(containerId);
-      el.innerHTML = labels.map((l, i) => `
-    <div class="legend-item">
-      <div class="legend-dot" style="background:${colors[i]}"></div>
-      <span>${l}&ensp;<span class="legend-pct">${fmt(pcts[i], 1)}%</span></span>
-    </div>
-  `).join('');
+      el.innerHTML = '';
+      el.classList.toggle('vertical', vertical);
+      for (let i = 0; i < labels.length; i++) {
+        const item = document.createElement('div');
+        item.className = 'legend-item';
+
+        const dot = document.createElement('div');
+        dot.className = 'legend-dot';
+        dot.style.backgroundColor = colors[i];
+
+        const textSpan = document.createElement('span');
+        textSpan.textContent = `${labels[i]} `;
+
+        const pctSpan = document.createElement('span');
+        pctSpan.className = 'legend-pct';
+        pctSpan.textContent = `${fmt(pcts[i], 1)}%`;
+
+        textSpan.appendChild(pctSpan);
+        item.appendChild(dot);
+        item.appendChild(textSpan);
+        el.appendChild(item);
+      }
     }
 
     // ─── Group by key ─────────────────────────────────────────────────────────────
@@ -869,18 +921,34 @@
 
         // 4. Enrich assets
         let totalValue = 0, totalPrev = 0;
+        let missingCount = 0;
         const enriched = assets.map(a => {
           const p = priceMap[a.ticker];
+          const hasError = !priceMap[a.ticker];
+
+          if (hasError) {
+            missingCount++;
+            return {
+              ...a,
+              price: NaN,
+              prev: NaN,
+              valueEur: NaN,
+              prevEur: NaN,
+              dailyPnl: NaN,
+              dailyReturn: NaN,
+              hasError: true
+            };
+          }
+
           const price = p?.price ?? 0;
           const prev = p?.prev ?? price;
           const valueEur = price * a.quantity;
           const prevEur = prev * a.quantity;
           const dailyPnl = valueEur - prevEur;
           const dailyReturn = prevEur > 0 ? (dailyPnl / prevEur) * 100 : 0;
-          const hasError = !!quotes.find(q => q.ticker === a.ticker)?.error;
           totalValue += valueEur;
           totalPrev += prevEur;
-          return { ...a, price, prev, valueEur, prevEur, dailyPnl, dailyReturn, hasError };
+          return { ...a, price, prev, valueEur, prevEur, dailyPnl, dailyReturn, hasError: false };
         });
 
         const totalPnl = totalValue - totalPrev;
@@ -888,8 +956,12 @@
 
         // ── KPIs ──────────────────────────────────────────────────────────────
         document.getElementById('totalValue').textContent = fmtEur(totalValue);
-        document.getElementById('kpiSub1').textContent =
-          `${assets.length} positions · ${new Set(assets.map(a => a.platform)).size} platforms`;
+        const platformCount = new Set(assets.map(a => a.platform)).size;
+        let subText = `${assets.length} positions · ${platformCount} platforms`;
+        if (missingCount > 0) {
+          subText += ` · <span class="warning">⚠ ${missingCount} position${missingCount > 1 ? 's' : ''} missing price data</span>`;
+        }
+        document.getElementById('kpiSub1').innerHTML = subText;
 
         const pnlEl = document.getElementById('dailyPnl');
         pnlEl.textContent = fmtSign(totalPnl);
@@ -910,7 +982,7 @@
         const byClass = groupBy(enriched, 'asset_class', totalValue);
         const clLabels = byClass.map(g => g.label);
         const clPcts = byClass.map(g => g.pct);
-        const clColors = clLabels.map(l => CLASS_COLORS[l] || PALETTE[clLabels.indexOf(l) % PALETTE.length]);
+        const clColors = clLabels.map((l, i) => CLASS_COLORS[l] || PALETTE[i % PALETTE.length]);
 
         renderDonut('classChart', clLabels, clPcts, clColors);
         renderLegend('classLegend', clLabels, clPcts, clColors);
@@ -948,46 +1020,106 @@
         document.getElementById('holdingsSubtitle').textContent =
           `${sorted.length} positions · sorted by value`;
 
-        tbody.innerHTML = sorted.map(a => {
+        tbody.innerHTML = '';
+        for (const a of sorted) {
+          const tr = document.createElement('tr');
           const weight = totalValue > 0 ? (a.valueEur / totalValue) * 100 : 0;
           const clr = CLASS_COLORS[a.asset_class] || PALETTE[0];
           const qty = fmt(a.quantity, a.quantity < 1 ? 6 : 3);
           const sign = a.dailyPnl >= 0 ? 'positive' : 'negative';
 
-          const errMark = a.hasError
-            ? `<span title="Price unavailable" style="color:var(--negative);margin-left:4px">⚠</span>`
-            : '';
+          // Ticker cell
+          const tdTicker = document.createElement('td');
+          tdTicker.className = 'td-ticker';
+          tdTicker.textContent = a.ticker.toUpperCase();
+          if (a.hasError) {
+            const errSpan = document.createElement('span');
+            errSpan.title = 'Price unavailable';
+            errSpan.style.cssText = 'color:var(--negative);margin-left:4px';
+            errSpan.textContent = '⚠';
+            tdTicker.appendChild(errSpan);
+          }
 
-          return `<tr>
-        <td class="td-ticker">${a.ticker.toUpperCase()}${errMark}</td>
-        <td style="font-size:12px;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.name}</td>
-        <td>
-          <span class="badge" style="background:${clr}1a;color:${clr}">
-            ${a.asset_class}
-          </span>
-        </td>
-        <td class="td-mono">${a.platform}</td>
-        <td class="td-mono">${a.geography}</td>
-        <td class="td-val td-mono">${qty}</td>
-        <td class="td-val td-mono">${fmtEur(a.price)}</td>
-        <td class="td-val" style="font-family:var(--font-m);font-weight:500">${fmtEur(a.valueEur)}</td>
-        <td class="td-change">
-          <div class="main ${sign}">${fmtSign(a.dailyPnl)}</div>
-          <div class="sub ${sign}">${fmtPct(a.dailyReturn)}</div>
-        </td>
-        <td>
-          <div class="weight-bar-wrap">
-            <div class="weight-bar-bg">
-              <div class="weight-bar-fill" style="width:${Math.min(weight, 100)}%;background:${clr}"></div>
-            </div>
-            ${fmt(weight, 1)}%
-          </div>
-        </td>
-      </tr>`;
-        }).join('');
+          // Name cell
+          const tdName = document.createElement('td');
+          tdName.className = 'td-name';
+          tdName.textContent = a.name;
+
+          // Asset class cell
+          const tdClass = document.createElement('td');
+          const badge = document.createElement('span');
+          badge.className = 'badge';
+          badge.style.cssText = `background:${clr}1a;color:${clr}`;
+          badge.textContent = a.asset_class;
+          tdClass.appendChild(badge);
+
+          // Platform cell
+          const tdPlatform = document.createElement('td');
+          tdPlatform.className = 'td-mono';
+          tdPlatform.textContent = a.platform;
+
+          // Geography cell
+          const tdGeo = document.createElement('td');
+          tdGeo.className = 'td-mono';
+          tdGeo.textContent = a.geography;
+
+          // Quantity cell
+          const tdQty = document.createElement('td');
+          tdQty.className = 'td-val td-mono';
+          tdQty.textContent = qty;
+
+          // Price cell
+          const tdPrice = document.createElement('td');
+          tdPrice.className = 'td-val td-mono';
+          tdPrice.textContent = fmtEur(a.price);
+
+          // Value cell
+          const tdValue = document.createElement('td');
+          tdValue.className = 'td-val td-val-bold';
+          tdValue.textContent = fmtEur(a.valueEur);
+
+          // Daily P&L cell
+          const tdPnl = document.createElement('td');
+          tdPnl.className = 'td-change';
+          const mainDiv = document.createElement('div');
+          mainDiv.className = `main ${sign}`;
+          mainDiv.textContent = fmtSign(a.dailyPnl);
+          const subDiv = document.createElement('div');
+          subDiv.className = `sub ${sign}`;
+          subDiv.textContent = fmtPct(a.dailyReturn);
+          tdPnl.appendChild(mainDiv);
+          tdPnl.appendChild(subDiv);
+
+          // Weight cell
+          const tdWeight = document.createElement('td');
+          const wrapDiv = document.createElement('div');
+          wrapDiv.className = 'weight-bar-wrap';
+          const bgDiv = document.createElement('div');
+          bgDiv.className = 'weight-bar-bg';
+          const fillDiv = document.createElement('div');
+          fillDiv.className = 'weight-bar-fill';
+          fillDiv.style.cssText = `width:${Math.min(weight, 100)}%;background:${clr}`;
+          bgDiv.appendChild(fillDiv);
+          const weightText = document.createElement('span');
+          weightText.textContent = `${fmt(weight, 1)}%`;
+          wrapDiv.appendChild(bgDiv);
+          wrapDiv.appendChild(weightText);
+          tdWeight.appendChild(wrapDiv);
+
+          tr.appendChild(tdTicker);
+          tr.appendChild(tdName);
+          tr.appendChild(tdClass);
+          tr.appendChild(tdPlatform);
+          tr.appendChild(tdGeo);
+          tr.appendChild(tdQty);
+          tr.appendChild(tdPrice);
+          tr.appendChild(tdValue);
+          tr.appendChild(tdPnl);
+          tr.appendChild(tdWeight);
+          tbody.appendChild(tr);
+        }
 
       } catch (err) {
-        const errEl = document.getElementById('errorBanner');
         errEl.style.display = 'block';
         errEl.textContent = `⚠  ${err.message}`;
         console.error(err);
@@ -997,6 +1129,7 @@
     }
 
     // Initial load
+    document.getElementById('refreshBtn').addEventListener('click', loadAll);
     loadAll();
   </script>
 </body>

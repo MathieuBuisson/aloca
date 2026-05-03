@@ -40,6 +40,7 @@ aloca/
 ├── proxy.test.ts         ← Test suite for the backend
 ├── dashboard.html        ← Frontend (HTML/CSS/JS)
 ├── portfolio.json        ← User holdings config
+├── tsconfig.json         ← TypeScript configuration
 ├── README.md             ← User-facing documentation
 ├── AGENTS.md             ← This file (agent onboarding)
 ├── version.txt           ← Version number
@@ -53,6 +54,10 @@ aloca/
 - **TypeScript style**: The code follows the [Google TypeScript Style Guide](https://google.github.io/styleguide/tsguide.html).
 - **README accuracy**: Before any changes, confirm the README setup steps (Bun installation, running `bun run proxy.ts`, opening http://localhost:8000) reflect actual requirements.
 - **Code vs docs**: Verify the README description matches the codebase — especially the API endpoint format (`/quotes?tickers=...&types=...`), caching behavior, and crypto detection logic (`asset_class: "Crypto"` triggers CoinGecko).
+- **Validation commands**: Run these before committing:
+  - `npx biome ci .` — lint and format check
+  - `npx tsc --noEmit` — type check
+  - `bun test` — run test suite
 - **Test suite**:
   - Run `bun test` to ensure no regressions were introduced.
   - The test suite uses Bun's native `mock` to intercept external fetch calls and avoid network requests.
