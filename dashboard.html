@@ -17,7 +17,6 @@
     :root {
       --bg: #08080e;
       --surface: #0f0f18;
-      --surface2: #16161f;
       --border: #1c1c2e;
       --border2: #252540;
       --text: #e2e2ef;
@@ -524,16 +523,6 @@
       }
     }
 
-    @keyframes shimmer {
-      from {
-        background-position: 200% 0;
-      }
-
-      to {
-        background-position: -200% 0;
-      }
-    }
-
     /* stagger cards */
     .kpi-card:nth-child(1) {
       animation-delay: .05s;
@@ -957,11 +946,12 @@
         // ── KPIs ──────────────────────────────────────────────────────────────
         document.getElementById('totalValue').textContent = fmtEur(totalValue);
         const platformCount = new Set(assets.map(a => a.platform)).size;
-        let subText = `${assets.length} positions · ${platformCount} platforms`;
+        const kpiSub1 = document.getElementById('kpiSub1');
+        kpiSub1.textContent = `${assets.length} positions · ${platformCount} platforms`;
         if (missingCount > 0) {
-          subText += ` · <span class="warning">⚠ ${missingCount} position${missingCount > 1 ? 's' : ''} missing price data</span>`;
+          const warning = el('span', 'warning', `⚠ ${missingCount} position${missingCount > 1 ? 's' : ''} missing price data`);
+          kpiSub1.append(' · ', warning);
         }
-        document.getElementById('kpiSub1').innerHTML = subText;
 
         const pnlEl = document.getElementById('dailyPnl');
         pnlEl.textContent = fmtSign(totalPnl);
