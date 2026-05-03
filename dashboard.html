@@ -744,6 +744,14 @@
     const fmtPct = (v) => `${(v >= 0 ? '+' : '') + fmt(v, 2)}%`;
     const fmtSign = (v) => (v >= 0 ? '+' : '') + fmtEur(v);
 
+    // ─── DOM helpers ───────────────────────────────────────────────────────────────
+    const el = (tag, cls, content) => {
+      const e = document.createElement(tag);
+      if (cls) e.className = cls;
+      if (content !== undefined) e.append(content);
+      return e;
+    };
+
     // ─── Chart registry ──────────────────────────────────────────────────────────
     const charts = {};
 
@@ -854,28 +862,20 @@
 
     // ─── Legend helper ────────────────────────────────────────────────────────────
     function renderLegend(containerId, labels, pcts, colors, vertical = false) {
-      const el = document.getElementById(containerId);
-      el.innerHTML = '';
-      el.classList.toggle('vertical', vertical);
+      const elCont = document.getElementById(containerId);
+      elCont.innerHTML = '';
+      elCont.classList.toggle('vertical', vertical);
       for (let i = 0; i < labels.length; i++) {
-        const item = document.createElement('div');
-        item.className = 'legend-item';
-
-        const dot = document.createElement('div');
-        dot.className = 'legend-dot';
+        const dot = el('div', 'legend-dot');
         dot.style.backgroundColor = colors[i];
 
-        const textSpan = document.createElement('span');
-        textSpan.textContent = `${labels[i]} `;
+        const textSpan = el('span', '', `${labels[i]} `);
+        const pctSpan = el('span', 'legend-pct', `${fmt(pcts[i], 1)}%`);
+        textSpan.append(pctSpan);
 
-        const pctSpan = document.createElement('span');
-        pctSpan.className = 'legend-pct';
-        pctSpan.textContent = `${fmt(pcts[i], 1)}%`;
-
-        textSpan.appendChild(pctSpan);
-        item.appendChild(dot);
-        item.appendChild(textSpan);
-        el.appendChild(item);
+        const item = el('div', 'legend-item');
+        item.append(dot, textSpan);
+        elCont.append(item);
       }
     }
 
@@ -884,7 +884,7 @@
       const map = {};
       for (const a of assets) {
         const k = a[key] ?? 'Unknown';
-        map[k] = (map[k] ?? 0) + a.valueEur;
+        map[k] = (map[k] ?? 0) + (a.valueEur || 0);
       }
       return Object.entries(map)
         .sort(([, a], [, b]) => b - a)
@@ -1015,107 +1015,60 @@
         document.getElementById('geoCount').textContent = byGeo.length;
 
         // ── Holdings table ────────────────────────────────────────────────────
-        const sorted = [...enriched].sort((a, b) => b.valueEur - a.valueEur);
+        const sorted = [...enriched].sort((a, b) => {
+          if (Number.isNaN(a.valueEur)) return 1;
+          if (Number.isNaN(b.valueEur)) return -1;
+          return b.valueEur - a.valueEur;
+        });
         const tbody = document.getElementById('holdingsBody');
         document.getElementById('holdingsSubtitle').textContent =
           `${sorted.length} positions · sorted by value`;
 
         tbody.innerHTML = '';
         for (const a of sorted) {
-          const tr = document.createElement('tr');
           const weight = totalValue > 0 ? (a.valueEur / totalValue) * 100 : 0;
           const clr = CLASS_COLORS[a.asset_class] || PALETTE[0];
           const qty = fmt(a.quantity, a.quantity < 1 ? 6 : 3);
           const sign = a.dailyPnl >= 0 ? 'positive' : 'negative';
 
-          // Ticker cell
-          const tdTicker = document.createElement('td');
-          tdTicker.className = 'td-ticker';
-          tdTicker.textContent = a.ticker.toUpperCase();
+          const tr = el('tr');
+
+          // Ticker
+          const tdTicker = el('td', 'td-ticker', a.ticker.toUpperCase());
           if (a.hasError) {
-            const errSpan = document.createElement('span');
+            const errSpan = el('span', '', '⚠');
             errSpan.title = 'Price unavailable';
             errSpan.style.cssText = 'color:var(--negative);margin-left:4px';
-            errSpan.textContent = '⚠';
-            tdTicker.appendChild(errSpan);
+            tdTicker.append(errSpan);
           }
 
-          // Name cell
-          const tdName = document.createElement('td');
-          tdName.className = 'td-name';
-          tdName.textContent = a.name;
-
-          // Asset class cell
-          const tdClass = document.createElement('td');
-          const badge = document.createElement('span');
-          badge.className = 'badge';
+          // Name, Class, Platform, Geo, Qty, Price, Value
+          const tdName = el('td', 'td-name', a.name);
+          const badge = el('span', 'badge', a.asset_class);
           badge.style.cssText = `background:${clr}1a;color:${clr}`;
-          badge.textContent = a.asset_class;
-          tdClass.appendChild(badge);
+          const tdClass = el('td', '', badge);
+          const tdPlatform = el('td', 'td-mono', a.platform);
+          const tdGeo = el('td', 'td-mono', a.geography);
+          const tdQty = el('td', 'td-val td-mono', qty);
+          const tdPrice = el('td', 'td-val td-mono', a.hasError ? '—' : fmtEur(a.price));
+          const tdValue = el('td', 'td-val td-val-bold', a.hasError ? '—' : fmtEur(a.valueEur));
 
-          // Platform cell
-          const tdPlatform = document.createElement('td');
-          tdPlatform.className = 'td-mono';
-          tdPlatform.textContent = a.platform;
+          // P&L
+          const pnlMain = el('div', a.hasError ? 'main' : `main ${sign}`, a.hasError ? '—' : fmtSign(a.dailyPnl));
+          const pnlSub = el('div', a.hasError ? 'sub' : `sub ${sign}`, a.hasError ? '—' : fmtPct(a.dailyReturn));
+          const tdPnl = el('td', 'td-change');
+          tdPnl.append(pnlMain, pnlSub);
 
-          // Geography cell
-          const tdGeo = document.createElement('td');
-          tdGeo.className = 'td-mono';
-          tdGeo.textContent = a.geography;
+          // Weight
+          const wFill = el('div', 'weight-bar-fill');
+          if (!a.hasError) wFill.style.cssText = `width:${Math.min(weight, 100)}%;background:${clr}`;
+          const wBg = el('div', 'weight-bar-bg', wFill);
+          const wText = el('span', '', a.hasError ? '—' : `${fmt(weight, 1)}%`);
+          const wWrap = el('div', 'weight-bar-wrap');
+          wWrap.append(wBg, wText);
+          const tdWeight = el('td', '', wWrap);
 
-          // Quantity cell
-          const tdQty = document.createElement('td');
-          tdQty.className = 'td-val td-mono';
-          tdQty.textContent = qty;
-
-          // Price cell
-          const tdPrice = document.createElement('td');
-          tdPrice.className = 'td-val td-mono';
-          tdPrice.textContent = fmtEur(a.price);
-
-          // Value cell
-          const tdValue = document.createElement('td');
-          tdValue.className = 'td-val td-val-bold';
-          tdValue.textContent = fmtEur(a.valueEur);
-
-          // Daily P&L cell
-          const tdPnl = document.createElement('td');
-          tdPnl.className = 'td-change';
-          const mainDiv = document.createElement('div');
-          mainDiv.className = `main ${sign}`;
-          mainDiv.textContent = fmtSign(a.dailyPnl);
-          const subDiv = document.createElement('div');
-          subDiv.className = `sub ${sign}`;
-          subDiv.textContent = fmtPct(a.dailyReturn);
-          tdPnl.appendChild(mainDiv);
-          tdPnl.appendChild(subDiv);
-
-          // Weight cell
-          const tdWeight = document.createElement('td');
-          const wrapDiv = document.createElement('div');
-          wrapDiv.className = 'weight-bar-wrap';
-          const bgDiv = document.createElement('div');
-          bgDiv.className = 'weight-bar-bg';
-          const fillDiv = document.createElement('div');
-          fillDiv.className = 'weight-bar-fill';
-          fillDiv.style.cssText = `width:${Math.min(weight, 100)}%;background:${clr}`;
-          bgDiv.appendChild(fillDiv);
-          const weightText = document.createElement('span');
-          weightText.textContent = `${fmt(weight, 1)}%`;
-          wrapDiv.appendChild(bgDiv);
-          wrapDiv.appendChild(weightText);
-          tdWeight.appendChild(wrapDiv);
-
-          tr.appendChild(tdTicker);
-          tr.appendChild(tdName);
-          tr.appendChild(tdClass);
-          tr.appendChild(tdPlatform);
-          tr.appendChild(tdGeo);
-          tr.appendChild(tdQty);
-          tr.appendChild(tdPrice);
-          tr.appendChild(tdValue);
-          tr.appendChild(tdPnl);
-          tr.appendChild(tdWeight);
+          tr.append(tdTicker, tdName, tdClass, tdPlatform, tdGeo, tdQty, tdPrice, tdValue, tdPnl, tdWeight);
           tbody.appendChild(tr);
         }
 
