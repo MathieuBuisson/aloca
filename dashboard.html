@@ -481,6 +481,11 @@
     const fmtEur = (v) => `€\u202f${fmt(v)}`;
     const fmtPct = (v) => `${(v >= 0 ? '+' : '') + fmt(v, 2)}%`;
     const fmtSign = (v) => (v >= 0 ? '+' : '') + fmtEur(v);
+    const fmtQuantity = (v) => {
+      if (v > 100) return Math.round(v).toLocaleString('fr-FR');
+      if (v > 10) return fmt(v, 1);
+      return fmt(v, 2);
+    };
     const el = (tag, cls, content) => { const e = document.createElement(tag); if (cls) e.className = cls; if (content !== undefined) e.append(content); return e; };
     const charts = {};
     function destroyChart(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
@@ -699,7 +704,7 @@
           // Platform, Geography, Qty
           const tdPlatform = el('td', '', a.platform);
           const tdGeo = el('td', '', a.geography);
-          const qty = fmt(a.quantity, a.quantity < 1 ? 6 : 3);
+          const qty = fmtQuantity(a.quantity);
           const tdQty = el('td', 'r', qty);
 
           // Price (show "—" if error)
@@ -708,7 +713,7 @@
           // Value (show "—" if error)
           const tdValue = el('td', 'r');
           tdValue.style.fontWeight = '700';
-          tdValue.textContent = a.hasError ? '—' : fmtEur(a.valueEur);
+          tdValue.textContent = a.hasError ? '—' : `€\u202f${Math.round(a.valueEur).toLocaleString('fr-FR')}`;
 
           // Daily P&L (show "—" if error)
           const pnlMain = el('div', a.hasError ? '' : sign, a.hasError ? '—' : fmtSign(a.dailyPnl));
