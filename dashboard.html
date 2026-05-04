@@ -285,6 +285,8 @@
     .table-wrap { overflow-x: auto; }
     table { width: 100%; border-spacing: 0 8px; border-collapse: separate; min-width: 900px; }
     th { text-align: left; padding: 0 16px 16px; font-family: var(--font-m); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+    th[data-sort] { cursor: pointer; user-select: none; }
+    th[data-sort]:hover { color: var(--text); }
     th.r { text-align: right; }
 
     td {
@@ -437,16 +439,16 @@
         <table>
           <thead>
             <tr>
-              <th>Ticker</th>
-              <th>Name</th>
-              <th>Class</th>
-              <th>Platform</th>
-              <th>Geography</th>
-              <th class="r">Qty</th>
-              <th class="r">Price (€)</th>
-              <th class="r">Value (€)</th>
-              <th class="r">Daily P&amp;L</th>
-              <th class="r">Weight</th>
+              <th data-sort="ticker">Ticker</th>
+              <th data-sort="name">Name</th>
+              <th data-sort="asset_class">Class</th>
+              <th data-sort="platform">Platform</th>
+              <th data-sort="geography">Geography</th>
+              <th class="r" data-sort="quantity">Qty</th>
+              <th class="r" data-sort="price">Price (€)</th>
+              <th class="r" data-sort="valueEur">Value (€)</th>
+              <th class="r" data-sort="dailyPnl">Daily P&amp;L</th>
+              <th class="r" data-sort="weight">Weight</th>
             </tr>
           </thead>
           <tbody id="holdingsBody">
@@ -532,10 +534,15 @@
       const errEl = document.getElementById('errorBanner');
       errEl.style.display = 'none';
 
+      // Sort state
+      let sortKey = 'valueEur';
+      let sortAsc = false;
+
       try {
         const pfRes = await fetch('/portfolio');
         if (!pfRes.ok) throw new Error(`Cannot load portfolio.json (${pfRes.status})`);
         const { assets, targets } = await pfRes.json();
+
         const tickers = assets.map(a => a.ticker).join(',');
         const types = assets.map(a => a.asset_class === 'Crypto' ? 'crypto' : 'etf').join(',');
         const qRes = await fetch(`/quotes?tickers=${encodeURIComponent(tickers)}&types=${encodeURIComponent(types)}`);
@@ -630,17 +637,40 @@
         renderLegend('geoLegend', gLabels, gPcts, gColors, true);
         document.getElementById('geoCount').textContent = byGeo.length;
 
-        const tbody = document.getElementById('holdingsBody');
-        tbody.innerHTML = '';
-        const sorted = [...enriched].sort((a, b) => {
-          if (Number.isNaN(a.valueEur)) return 1;
-          if (Number.isNaN(b.valueEur)) return -1;
-          return b.valueEur - a.valueEur;
+        // Sort handlers for headers
+        document.querySelectorAll('th[data-sort]').forEach(th => {
+          th.addEventListener('click', () => {
+            const key = th.dataset.sort;
+            if (sortKey === key) {
+              sortAsc = !sortAsc;
+            } else {
+              sortKey = key;
+              sortAsc = true;
+            }
+            renderTable();
+          });
         });
-        document.getElementById('holdingsSubtitle').textContent =
-          `${sorted.length} positions · sorted by value`;
 
-        sorted.forEach(a => {
+        const renderTable = () => {
+          const tbody = document.getElementById('holdingsBody');
+          tbody.innerHTML = '';
+          const sorted = [...enriched].sort((a, b) => {
+            if (Number.isNaN(a.valueEur)) return 1;
+            if (Number.isNaN(b.valueEur)) return -1;
+            let va = a[sortKey], vb = b[sortKey];
+            if (typeof va === 'string') va = va.toLowerCase();
+            if (typeof vb === 'string') vb = vb.toLowerCase();
+            if (va < vb) return sortAsc ? -1 : 1;
+            if (va > vb) return sortAsc ? 1 : -1;
+            return b.valueEur - a.valueEur;
+          });
+          const sortLabel = document.querySelector(`th[data-sort="${sortKey}"]`)?.textContent
+            || { valueEur: 'value (€)', quantity: 'qty', dailyPnl: 'daily p&l', weight: 'weight' }[sortKey]
+            || sortKey;
+          document.getElementById('holdingsSubtitle').textContent =
+            `${sorted.length} positions · sorted by ${sortLabel.toLowerCase()} ${sortAsc ? '(asc)' : '(desc)'}`;
+
+          sorted.forEach(a => {
           const weight = totalValue > 0 ? (a.valueEur / totalValue) * 100 : 0;
           const clr = CLASS_COLORS[a.asset_class] || PALETTE[0];
           const sign = a.dailyPnl >= 0 ? 'positive' : 'negative';
@@ -663,6 +693,7 @@
 
           // Class badge
           const badge = el('span', 'badge', a.asset_class);
+          badge.style.cssText = `background:${clr}1a;color:${clr}`;
           const tdClass = el('td', '', badge);
 
           // Platform, Geography, Qty
@@ -701,7 +732,11 @@
 
           tr.append(tdTicker, tdName, tdClass, tdPlatform, tdGeo, tdQty, tdPrice, tdValue, tdPnl, tdWeight);
           tbody.appendChild(tr);
-        });
+          });
+        }
+
+        // Initial render
+        renderTable();
       } catch (e) { errEl.style.display = 'block'; errEl.textContent = `⚠  ${e.message}`; console.error(e); } finally { btn.disabled = false; btn.textContent = '↻ REFRESH'; }
     }
     document.getElementById('refreshBtn').addEventListener('click', loadAll);
