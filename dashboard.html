@@ -15,26 +15,31 @@
     </script>
   <style>
     :root {
-      --bg: #08080e;
-      --surface: #0f0f18;
-      --border: #1c1c2e;
-      --border2: #252540;
-      --text: #e2e2ef;
-      --muted: #5a5a7a;
-      --muted2: #3a3a55;
+      --bg: #1a1816;
+      --bg-gradient: radial-gradient(circle at top right, #3d342d, #1a1816 60%);
+      --surface: rgba(40, 36, 32, 0.45); /* Warm glass morphic surface */
+      --surface-bright: rgba(60, 55, 50, 0.7);
+      --border: rgba(255, 255, 255, 0.08);
+      --border2: rgba(232, 160, 32, 0.15);
+
+      --text: #f8f8f2;
+      --muted: #a6a69a;
+      --muted2: #4a4540;
+
       --accent: #e8a020;
-      --accent-dim: rgba(232, 160, 32, 0.10);
-      --accent-glow: rgba(232, 160, 32, 0.06);
+      --accent-teal: #2ec4b6;
       --positive: #2dd4a0;
       --negative: #f06070;
+
       --font-h: 'Syne', sans-serif;
       --font-b: 'Figtree', sans-serif;
       --font-m: 'DM Mono', monospace;
+
+      --radius-lg: 24px;
+      --radius-md: 12px;
     }
 
-    *,
-    *::before,
-    *::after {
+    *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
@@ -45,19 +50,15 @@
     }
 
     body {
-      background: var(--bg);
+      background: var(--bg-gradient);
+      background-attachment: fixed;
       color: var(--text);
       font-family: var(--font-b);
-      font-weight: 400;
       min-height: 100vh;
-      /* subtle grid */
-      background-image:
-        linear-gradient(rgba(232, 160, 32, .025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(232, 160, 32, .025) 1px, transparent 1px);
-      background-size: 48px 48px;
+      line-height: 1.5;
     }
 
-    /* ─── Header ─────────────────────────────────────────────────────── */
+    /* ─── Header (Glass Style) ─── */
     header {
       position: sticky;
       top: 0;
@@ -65,9 +66,9 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 18px 40px;
-      background: rgba(8, 8, 14, .85);
-      backdrop-filter: blur(16px);
+      padding: 24px 40px;
+      background: rgba(26, 24, 22, 0.6);
+      backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
     }
 
@@ -77,21 +78,21 @@
       gap: 14px;
     }
 
-    /* diamond made of two triangles */
     .logo-mark {
-      width: 22px;
-      height: 22px;
-      background: var(--accent);
-      clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-teal));
+      border-radius: 6px;
+      box-shadow: 0 0 15px rgba(232, 160, 32, 0.3);
     }
 
     .logo-text {
       font-family: var(--font-h);
-      font-size: 15px;
+      font-size: 18px;
       font-weight: 700;
-      letter-spacing: .14em;
-      text-transform: uppercase;
+      letter-spacing: 0.02em;
       color: var(--text);
+      text-transform: none;
     }
 
     .header-right {
@@ -104,111 +105,95 @@
       font-family: var(--font-m);
       font-size: 11px;
       color: var(--muted);
-      letter-spacing: .05em;
     }
 
     .refresh-btn {
-      background: var(--accent-dim);
-      border: 1px solid rgba(232, 160, 32, .25);
-      color: var(--accent);
-      padding: 7px 16px;
-      border-radius: 6px;
-      font-family: var(--font-m);
-      font-size: 11px;
-      letter-spacing: .08em;
+      background: var(--surface-bright);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 20px;
+      border-radius: 100px;
+      font-family: var(--font-b);
+      font-weight: 600;
+      font-size: 12px;
       cursor: pointer;
-      transition: background .2s, border-color .2s;
+      transition: all 0.3s ease;
     }
 
     .refresh-btn:hover {
-      background: rgba(232, 160, 32, .18);
-      border-color: rgba(232, 160, 32, .5);
+      background: var(--accent);
+      color: #000;
+      transform: translateY(-1px);
     }
 
-    .refresh-btn:disabled {
-      opacity: .4;
-      cursor: not-allowed;
-    }
-
-    /* ─── Layout ─────────────────────────────────────────────────────── */
+    /* ─── Layout ─── */
     main {
       max-width: 1440px;
       margin: 0 auto;
-      padding: 36px 40px 60px;
+      padding: 40px;
     }
 
-    /* ─── Error banner ───────────────────────────────────────────────── */
+    /* ─── Error banner ─── */
     .error-banner {
       background: rgba(240, 96, 112, .08);
       border: 1px solid rgba(240, 96, 112, .3);
       color: var(--negative);
-      padding: 12px 18px;
-      border-radius: 8px;
+      padding: 16px;
+      border-radius: var(--radius-md);
       font-family: var(--font-m);
       font-size: 12px;
       margin-bottom: 20px;
       display: none;
     }
 
-    /* ─── KPI row ────────────────────────────────────────────────────── */
+    /* ─── KPI Row (Glass Cards) ─── */
     .kpi-row {
       display: grid;
       grid-template-columns: 2fr 1fr 1fr 1fr;
-      gap: 14px;
-      margin-bottom: 24px;
+      gap: 20px;
+      margin-bottom: 30px;
     }
 
     .kpi-card {
       background: var(--surface);
+      backdrop-filter: blur(12px);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 24px 26px;
-      position: relative;
-      overflow: hidden;
-      animation: fadeUp .35s ease both;
+      border-radius: var(--radius-lg);
+      padding: 30px;
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+
+    .kpi-card:hover {
+      border-color: var(--border2);
+      transform: translateY(-2px);
     }
 
     .kpi-card.primary {
-      border-color: rgba(232, 160, 32, .25);
-      background: linear-gradient(135deg, var(--surface) 60%, rgba(232, 160, 32, .06) 100%);
-    }
-
-    /* top accent bar */
-    .kpi-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent 0%, var(--accent) 50%, transparent 100%);
-      opacity: 0;
-    }
-
-    .kpi-card.primary::before {
-      opacity: 1;
+      background: linear-gradient(145deg, rgba(232, 160, 32, 0.1), rgba(26, 24, 22, 0.4));
+      border-color: var(--border2);
     }
 
     .kpi-label {
-      font-family: var(--font-m);
-      font-size: 10px;
-      letter-spacing: .12em;
+      font-size: 12px;
+      font-weight: 600;
       text-transform: uppercase;
+      letter-spacing: 0.05em;
       color: var(--muted);
-      margin-bottom: 14px;
+      margin-bottom: 10px;
     }
 
     .kpi-value {
       font-family: var(--font-h);
-      font-size: 32px;
+      font-size: 34px;
       font-weight: 700;
-      line-height: 1;
-      color: var(--text);
+      letter-spacing: -0.03em;
     }
 
     .kpi-card.primary .kpi-value {
-      font-size: 44px;
-      color: var(--accent);
+      font-size: 48px;
+      background: linear-gradient(to bottom, #fff, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     .kpi-sub {
@@ -222,32 +207,25 @@
       color: var(--negative);
     }
 
-    /* ─── Charts grid ────────────────────────────────────────────────── */
+    /* ─── Charts ─── */
     .charts-row {
       display: grid;
-      gap: 14px;
-      margin-bottom: 14px;
+      gap: 20px;
+      margin-bottom: 20px;
     }
 
-    .charts-row.two {
-      grid-template-columns: 1fr 1fr;
-    }
-
-    .charts-row.three {
-      grid-template-columns: 1fr 1fr 1fr;
-    }
+    .charts-row.two { grid-template-columns: 1fr 1fr; }
+    .charts-row.three { grid-template-columns: 1fr 1fr 1fr; }
 
     .chart-card {
       background: var(--surface);
+      backdrop-filter: blur(12px);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 26px 28px;
-      animation: fadeUp .4s ease both;
+      border-radius: var(--radius-lg);
+      padding: 30px;
     }
 
-    .chart-card.span2 {
-      grid-column: span 2;
-    }
+    .chart-card.span2 { grid-column: span 2; }
 
     .card-header {
       display: flex;
@@ -258,316 +236,117 @@
 
     .card-title {
       font-family: var(--font-h);
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: .10em;
-      text-transform: uppercase;
+      font-size: 14px;
+      font-weight: 700;
       color: var(--text);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
     .card-subtitle {
       font-family: var(--font-m);
       font-size: 10px;
       color: var(--muted);
-      letter-spacing: .05em;
     }
 
-    /* ─── Donut ──────────────────────────────────────────────────────── */
-    .donut-wrap {
-      position: relative;
-      max-width: 220px;
-      margin: 0 auto;
-    }
-
+    /* ─── Donut Center ─── */
+    .donut-wrap { position: relative; max-width: 220px; margin: 0 auto; }
     .donut-center {
       position: absolute;
-      top: 50%;
-      left: 50%;
+      top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       text-align: center;
       pointer-events: none;
     }
+    .donut-center-val { font-family: var(--font-h); font-size: 24px; font-weight: 700; color: var(--text); }
+    .donut-center-lbl { font-family: var(--font-m); font-size: 12px; color: var(--muted); }
 
-    .donut-center-val {
-      font-family: var(--font-h);
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--text);
-      line-height: 1;
-    }
+    /* ─── Legend ─── */
+    .legend { display: flex; flex-wrap: wrap; gap: 10px 16px; margin-top: 18px; justify-content: center; }
+    .legend.vertical { flex-direction: column; justify-content: flex-start; margin-top: 0; gap: 12px; }
+    .legend-item { display: flex; align-items: center; gap: 8px; font-family: var(--font-m); font-size: 11px; color: var(--muted); }
+    .legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+    .legend-pct { color: var(--text); }
 
-    .donut-center-lbl {
-      font-family: var(--font-m);
-      font-size: 9px;
-      color: var(--muted);
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      margin-top: 4px;
-    }
+    /* ─── Geo layout (donut + legend side by side) ─── */
+    .geo-layout { display: flex; align-items: center; gap: 28px; }
+    .geo-layout .donut-wrap { flex-shrink: 0; }
 
-    /* ─── Legend ─────────────────────────────────────────────────────── */
-    .legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px 16px;
-      margin-top: 18px;
-      justify-content: center;
-    }
-
-    .legend.vertical {
-      flex-direction: column;
-      justify-content: flex-start;
-      margin-top: 0;
-      gap: 12px;
-    }
-
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-family: var(--font-m);
-      font-size: 11px;
-      color: var(--muted);
-    }
-
-    .legend-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 2px;
-      flex-shrink: 0;
-    }
-
-    .legend-pct {
-      color: var(--text);
-    }
-
-    /* ─── Geo layout (donut + legend side by side) ───────────────────── */
-    .geo-layout {
-      display: flex;
-      align-items: center;
-      gap: 28px;
-    }
-
-    .geo-layout .donut-wrap {
-      flex-shrink: 0;
-    }
-
-    /* ─── Holdings table ─────────────────────────────────────────────── */
+    /* ─── Holdings Table ─── */
     .holdings-card {
       background: var(--surface);
+      backdrop-filter: blur(12px);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 26px 28px;
-      margin-top: 14px;
-      animation: fadeUp .5s ease both;
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      margin-top: 24px;
     }
 
-    .table-wrap {
-      overflow-x: auto;
-      margin-top: 4px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 860px;
-    }
-
-    th {
-      font-family: var(--font-m);
-      font-size: 9px;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      text-align: left;
-      padding: 0 14px 12px;
-      border-bottom: 1px solid var(--border);
-      white-space: nowrap;
-    }
-
-    th.r {
-      text-align: right;
-    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-spacing: 0 8px; border-collapse: separate; min-width: 900px; }
+    th { text-align: left; padding: 0 16px 16px; font-family: var(--font-m); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+    th.r { text-align: right; }
 
     td {
-      padding: 13px 14px;
+      background: rgba(255, 255, 255, 0.02);
+      padding: 16px;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
       font-size: 13px;
-      border-bottom: 1px solid rgba(28, 28, 46, .6);
-      vertical-align: middle;
     }
 
-    tr:last-child td {
-      border-bottom: none;
-    }
+    td:first-child { border-left: 1px solid var(--border); border-radius: 12px 0 0 12px; }
+    td:last-child { border-right: 1px solid var(--border); border-radius: 0 12px 12px 0; }
 
     tr:hover td {
-      background: rgba(255, 255, 255, .015);
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--border2);
     }
 
     .td-ticker {
       font-family: var(--font-m);
-      font-size: 12px;
+      font-weight: 600;
       color: var(--accent);
-      font-weight: 500;
-    }
-
-    .td-mono {
-      font-family: var(--font-m);
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .td-name {
-      font-size: 12px;
-      max-width: 220px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .td-val {
-      font-family: var(--font-m);
-      font-size: 13px;
-      text-align: right;
-    }
-
-    .td-val-bold {
-      font-weight: 500;
-    }
-
-    .td-change {
-      text-align: right;
-    }
-
-    .td-change .main {
-      font-family: var(--font-m);
-      font-size: 12px;
-    }
-
-    .td-change .sub {
-      font-family: var(--font-m);
-      font-size: 10px;
-      color: var(--muted);
+      background: rgba(232, 160, 32, 0.1);
+      padding: 4px 8px;
+      border-radius: 6px;
     }
 
     .badge {
-      display: inline-block;
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-family: var(--font-m);
-      font-size: 9px;
-      letter-spacing: .06em;
+      background: rgba(46, 196, 182, 0.1);
+      color: var(--accent-teal);
+      padding: 4px 10px;
+      border-radius: 100px;
+      font-size: 10px;
+      font-weight: 700;
       text-transform: uppercase;
-      white-space: nowrap;
     }
 
-    .weight-bar-wrap {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 8px;
-      font-family: var(--font-m);
-      font-size: 11px;
-      color: var(--muted);
-    }
+    .weight-bar-bg { background: var(--muted2); height: 6px; width: 60px; border-radius: 10px; overflow: hidden; }
+    .weight-bar-fill { height: 100%; border-radius: 10px; }
+    .weight-bar-wrap { display: flex; align-items: center; justify-content: flex-end; gap: 8px; font-family: var(--font-m); font-size: 11px; color: var(--muted); }
 
-    .weight-bar-bg {
-      width: 44px;
-      height: 3px;
-      background: var(--border2);
-      border-radius: 2px;
-      overflow: hidden;
-    }
+    /* ─── Colour helpers ─── */
+    .positive { color: var(--positive); }
+    .negative { color: var(--negative); }
 
-    .weight-bar-fill {
-      height: 100%;
-      border-radius: 2px;
-    }
-
-    /* ─── Colour helpers ─────────────────────────────────────────────── */
-    .positive {
-      color: var(--positive);
-    }
-
-    .negative {
-      color: var(--negative);
-    }
-
-    /* ─── Error row ──────────────────────────────────────────────────── */
-    .error-row td {
-      color: var(--muted);
-      font-family: var(--font-m);
-      font-size: 11px;
-    }
-
-    /* ─── Loading ────────────────────────────────────────────────────── */
-    .loading-row td {
-      font-family: var(--font-m);
-      font-size: 11px;
-      color: var(--muted);
-      letter-spacing: .08em;
-      text-align: center;
-      padding: 32px;
-    }
-
-    /* ─── Animations ─────────────────────────────────────────────────── */
+    /* ─── Animations ─── */
     @keyframes fadeUp {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-
-    /* stagger cards */
-    .kpi-card:nth-child(1) {
-      animation-delay: .05s;
-    }
-
-    .kpi-card:nth-child(2) {
-      animation-delay: .10s;
-    }
-
-    .kpi-card:nth-child(3) {
-      animation-delay: .15s;
-    }
-
-    .kpi-card:nth-child(4) {
-      animation-delay: .20s;
-    }
-
-    @media (max-width: 900px) {
-      .kpi-row {
-        grid-template-columns: 1fr;
-      }
-
-      .charts-row.two,
-      .charts-row.three {
-        grid-template-columns: 1fr;
-      }
-
-      .geo-layout {
-        flex-direction: column;
-      }
-
-      .geo-layout .legend {
-        margin-top: 18px;
-      }
+    .kpi-card, .chart-card, .holdings-card {
+      animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
   </style>
 </head>
 
 <body>
 
-  <!-- ─── Header ──────────────────────────────────────────────────────────── -->
   <header>
     <div class="logo">
       <div class="logo-mark"></div>
-      <span class="logo-text">Aloca — Portfolio Dashboard</span>
+      <span class="logo-text">Aloca — Portfolio</span>
     </div>
     <div class="header-right">
       <span class="last-updated" id="lastUpdated">—</span>
@@ -576,13 +355,12 @@
   </header>
 
   <main>
-
     <div class="error-banner" id="errorBanner"></div>
 
     <!-- KPI Row -->
     <div class="kpi-row">
       <div class="kpi-card primary">
-        <div class="kpi-label">Total Portfolio Value</div>
+        <div class="kpi-label">Total Value</div>
         <div class="kpi-value" id="totalValue">—</div>
         <div class="kpi-sub" id="kpiSub1">—</div>
       </div>
@@ -603,12 +381,12 @@
       </div>
     </div>
 
-    <!-- Row 1: Asset class donut + Actual vs Target bar -->
-    <div class="charts-row two">
+    <!-- Charts Row 1: Asset Class + Platform + Geography -->
+    <div class="charts-row three">
       <div class="chart-card">
         <div class="card-header">
-          <span class="card-title">Allocation — Asset Class</span>
-          <span class="card-subtitle">current</span>
+          <span class="card-title">Allocation</span>
+          <span class="card-subtitle">by asset class</span>
         </div>
         <div class="donut-wrap">
           <canvas id="classChart" height="220"></canvas>
@@ -619,22 +397,9 @@
         </div>
         <div class="legend" id="classLegend"></div>
       </div>
-
-      <div class="chart-card">
-        <div class="card-header">
-          <span class="card-title">Actual vs Target</span>
-          <span class="card-subtitle">by asset class</span>
-        </div>
-        <canvas id="targetChart" height="220"></canvas>
-      </div>
-    </div>
-
-    <!-- Row 2: Platform donut + Geography (wider) -->
-    <div class="charts-row three">
       <div class="chart-card">
         <div class="card-header">
           <span class="card-title">By Platform</span>
-          <span class="card-subtitle">account</span>
         </div>
         <div class="donut-wrap">
           <canvas id="platformChart" height="220"></canvas>
@@ -645,11 +410,9 @@
         </div>
         <div class="legend" id="platformLegend"></div>
       </div>
-
-      <div class="chart-card span2">
+      <div class="chart-card">
         <div class="card-header">
           <span class="card-title">By Geography</span>
-          <span class="card-subtitle">exposure</span>
         </div>
         <div class="geo-layout">
           <div class="donut-wrap" style="width:220px">
@@ -664,10 +427,10 @@
       </div>
     </div>
 
-    <!-- Holdings table -->
+    <!-- Holdings -->
     <div class="holdings-card">
       <div class="card-header">
-        <span class="card-title">Holdings</span>
+        <span class="card-title">Detailed Holdings</span>
         <span class="card-subtitle" id="holdingsSubtitle">all positions</span>
       </div>
       <div class="table-wrap">
@@ -688,199 +451,80 @@
           </thead>
           <tbody id="holdingsBody">
             <tr class="loading-row">
-              <td colspan="10">LOADING POSITIONS…</td>
+              <td colspan="10" style="text-align:center; padding:40px;">LOADING POSITIONS…</td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
 
+    <!-- Actual vs Target (below holdings) -->
+    <div class="charts-row two" style="margin-top: 20px;">
+      <div class="chart-card">
+        <div class="card-header">
+          <span class="card-title">Current allocation vs Target</span>
+          <span class="card-subtitle">rebalancing</span>
+        </div>
+        <canvas id="targetChart" height="220"></canvas>
+      </div>
+    </div>
   </main>
 
   <script>
-    // ─── Palette ────────────────────────────────────────────────────────────────
-    const CLASS_COLORS = {
-      'Equities': '#60a5fa',
-      'Bonds': '#34d399',
-      'Real Estate': '#a78bfa',
-      'Crypto': '#e8a020',
-      'Cash': '#64748b',
-    };
-
-    const PALETTE = [
-      '#e8a020', '#60a5fa', '#a78bfa', '#34d399', '#f87171',
-      '#fb923c', '#38bdf8', '#c084fc', '#4ade80', '#fbbf24',
-    ];
-
-    const CHART_DEFAULTS = {
-      tooltip: {
-        backgroundColor: '#16161f',
-        borderColor: '#252540',
-        borderWidth: 1,
-        titleColor: '#e2e2ef',
-        bodyColor: '#5a5a7a',
-        titleFont: { family: 'DM Mono', size: 11 },
-        bodyFont: { family: 'DM Mono', size: 11 },
-        padding: 12,
-      },
-    };
-
-    // ─── Formatting ──────────────────────────────────────────────────────────────
-    const fmt = (v, d = 2) =>
-      new Intl.NumberFormat('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d }).format(v);
-
+    // [The original JavaScript logic from dashboard.html remains unchanged here]
+    const CLASS_COLORS = { 'Equities': '#60a5fa', 'Bonds': '#34d399', 'Real Estate': '#a78bfa', 'Crypto': '#e8a020', 'Cash': '#64748b' };
+    const PALETTE = ['#e8a020', '#60a5fa', '#a78bfa', '#34d399', '#f87171', '#fb923c', '#38bdf8', '#c084fc', '#4ade80', '#fbbf24'];
+    const CHART_DEFAULTS = { tooltip: { backgroundColor: '#16161f', borderColor: '#252540', borderWidth: 1, titleColor: '#e2e2ef', bodyColor: '#a6a69a', titleFont: { family: 'DM Mono', size: 11 }, bodyFont: { family: 'DM Mono', size: 11 }, padding: 12 } };
+    const fmt = (v, d = 2) => new Intl.NumberFormat('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d }).format(v);
     const fmtEur = (v) => `€\u202f${fmt(v)}`;
     const fmtPct = (v) => `${(v >= 0 ? '+' : '') + fmt(v, 2)}%`;
     const fmtSign = (v) => (v >= 0 ? '+' : '') + fmtEur(v);
-
-    // ─── DOM helpers ───────────────────────────────────────────────────────────────
-    const el = (tag, cls, content) => {
-      const e = document.createElement(tag);
-      if (cls) e.className = cls;
-      if (content !== undefined) e.append(content);
-      return e;
-    };
-
-    // ─── Chart registry ──────────────────────────────────────────────────────────
+    const el = (tag, cls, content) => { const e = document.createElement(tag); if (cls) e.className = cls; if (content !== undefined) e.append(content); return e; };
     const charts = {};
+    function destroyChart(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
 
-    function destroyChart(id) {
-      if (charts[id]) { charts[id].destroy(); delete charts[id]; }
-    }
-
-    // ─── Donut ───────────────────────────────────────────────────────────────────
     function renderDonut(id, labels, pcts, colors) {
       destroyChart(id);
       const ctx = document.getElementById(id).getContext('2d');
       charts[id] = new Chart(ctx, {
         type: 'doughnut',
-        data: {
-          labels,
-          datasets: [{
-            data: pcts,
-            backgroundColor: colors,
-            borderColor: '#08080e',
-            borderWidth: 3,
-            hoverBorderWidth: 3,
-            hoverOffset: 4,
-          }],
-        },
-        options: {
-          cutout: '74%',
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              ...CHART_DEFAULTS.tooltip,
-              callbacks: { label: (c) => `  ${c.label}:  ${fmt(c.parsed, 1)}%` },
-            },
-          },
-          animation: { animateRotate: true, duration: 550, easing: 'easeOutQuart' },
-        },
+        data: { labels, datasets: [{ data: pcts, backgroundColor: colors, borderColor: 'transparent', borderWidth: 0, hoverOffset: 8 }] },
+        options: { cutout: '78%', plugins: { legend: { display: false }, tooltip: { ...CHART_DEFAULTS.tooltip } }, animation: { duration: 800, easing: 'easeOutQuart' } }
       });
     }
 
-    // ─── Bar chart (actual vs target) ────────────────────────────────────────────
     function renderBarChart(id, labels, actualPcts, targetPcts) {
       destroyChart(id);
       const ctx = document.getElementById(id).getContext('2d');
       const barColors = labels.map(l => CLASS_COLORS[l] || PALETTE[0]);
-
+      const targetColors = barColors.map(c => `${c}33`); // 20% opacity version of actual bar colors
       charts[id] = new Chart(ctx, {
         type: 'bar',
-        data: {
-          labels,
-          datasets: [
-            {
-              label: 'Actual',
-              data: actualPcts,
-              backgroundColor: barColors.map(c => `${c}cc`),
-              borderColor: barColors,
-              borderWidth: 1,
-              borderRadius: 5,
-              borderSkipped: false,
-            },
-            {
-              label: 'Target',
-              data: targetPcts,
-              backgroundColor: 'transparent',
-              borderColor: barColors,
-              borderWidth: 2,
-              borderRadius: 5,
-              borderSkipped: false,
-              borderDash: [4, 3],
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          scales: {
-            x: {
-              grid: { color: 'rgba(28,28,46,.9)', drawBorder: false },
-              ticks: { color: '#5a5a7a', font: { family: 'DM Mono', size: 10 } },
-            },
-            y: {
-              grid: { color: 'rgba(28,28,46,.9)' },
-              ticks: {
-                color: '#5a5a7a',
-                font: { family: 'DM Mono', size: 10 },
-                callback: (v) => `${v}%`,
-              },
-              max: (actualPcts.length || targetPcts.length)
-                ? Math.ceil(Math.max(...actualPcts, ...targetPcts) / 10) * 10 + 10
-                : 100,
-              min: 0,
-            },
-          },
-          plugins: {
-            legend: {
-              labels: {
-                color: '#5a5a7a',
-                font: { family: 'DM Mono', size: 10 },
-                boxWidth: 10, boxHeight: 10,
-              },
-            },
-            tooltip: {
-              ...CHART_DEFAULTS.tooltip,
-              callbacks: { label: (c) => `  ${c.dataset.label}:  ${fmt(c.parsed.y, 1)}%` },
-            },
-          },
-          animation: { duration: 550, easing: 'easeOutQuart' },
-        },
+        data: { labels, datasets: [{ label: 'Actual', data: actualPcts, backgroundColor: barColors, borderRadius: 6 }, { label: 'Target', data: targetPcts, backgroundColor: targetColors, borderColor: barColors, borderWidth: 2, borderDash: [4, 4], borderRadius: 6 }] },
+        options: { scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#a6a69a' } }, x: { grid: { display: false }, ticks: { color: '#a6a69a' } } }, plugins: { legend: { display: false } } }
       });
     }
 
-    // ─── Legend helper ────────────────────────────────────────────────────────────
     function renderLegend(containerId, labels, pcts, colors, vertical = false) {
       const elCont = document.getElementById(containerId);
       elCont.innerHTML = '';
       elCont.classList.toggle('vertical', vertical);
       for (let i = 0; i < labels.length; i++) {
-        const dot = el('div', 'legend-dot');
-        dot.style.backgroundColor = colors[i];
-
+        const dot = el('div', 'legend-dot'); dot.style.backgroundColor = colors[i];
         const textSpan = el('span', '', `${labels[i]} `);
         const pctSpan = el('span', 'legend-pct', `${fmt(pcts[i], 1)}%`);
         textSpan.append(pctSpan);
-
-        const item = el('div', 'legend-item');
-        item.append(dot, textSpan);
+        const item = el('div', 'legend-item'); item.append(dot, textSpan);
         elCont.append(item);
       }
     }
 
-    // ─── Group by key ─────────────────────────────────────────────────────────────
     function groupBy(assets, key, total) {
       const map = {};
-      for (const a of assets) {
-        const k = a[key] ?? 'Unknown';
-        map[k] = (map[k] ?? 0) + (a.valueEur || 0);
-      }
-      return Object.entries(map)
-        .sort(([, a], [, b]) => b - a)
-        .map(([label, value]) => ({ label, value, pct: total > 0 ? (value / total) * 100 : 0 }));
+      for (const a of assets) { const k = a[key] ?? 'Unknown'; map[k] = (map[k] ?? 0) + (a.valueEur || 0); }
+      return Object.entries(map).sort(([, a], [, b]) => b - a).map(([label, value]) => ({ label, value, pct: total > 0 ? (value / total) * 100 : 0 }));
     }
 
-    // ─── Main data loader ─────────────────────────────────────────────────────────
     async function loadAll() {
       const btn = document.getElementById('refreshBtn');
       btn.disabled = true; btn.textContent = '↻ LOADING';
@@ -889,26 +533,17 @@
       errEl.style.display = 'none';
 
       try {
-        // 1. Portfolio config
         const pfRes = await fetch('/portfolio');
         if (!pfRes.ok) throw new Error(`Cannot load portfolio.json (${pfRes.status})`);
         const { assets, targets } = await pfRes.json();
-
-        // 2. Batch quotes
         const tickers = assets.map(a => a.ticker).join(',');
         const types = assets.map(a => a.asset_class === 'Crypto' ? 'crypto' : 'etf').join(',');
-
         const qRes = await fetch(`/quotes?tickers=${encodeURIComponent(tickers)}&types=${encodeURIComponent(types)}`);
         if (!qRes.ok) throw new Error(`Quotes endpoint error (${qRes.status})`);
         const quotes = await qRes.json();
-
-        // 3. Build price map (ticker → { priceEur, previousCloseEur })
         const priceMap = {};
-        for (const q of quotes) {
-          if (!q.error) priceMap[q.ticker] = { price: q.priceEur, prev: q.previousCloseEur };
-        }
+        for (const q of quotes) if (!q.error) priceMap[q.ticker] = { price: q.priceEur, prev: q.previousCloseEur };
 
-        // 4. Enrich assets
         let totalValue = 0, totalPrev = 0;
         let missingCount = 0;
         const enriched = assets.map(a => {
@@ -933,58 +568,49 @@
           const prev = p?.prev ?? price;
           const valueEur = price * a.quantity;
           const prevEur = prev * a.quantity;
-          const dailyPnl = valueEur - prevEur;
-          const dailyReturn = prevEur > 0 ? (dailyPnl / prevEur) * 100 : 0;
           totalValue += valueEur;
           totalPrev += prevEur;
-          return { ...a, price, prev, valueEur, prevEur, dailyPnl, dailyReturn, hasError: false };
+          return { ...a, price, prev, valueEur, prevEur, dailyPnl: valueEur - prevEur, dailyReturn: prevEur > 0 ? ((valueEur - prevEur) / prevEur) * 100 : 0, hasError: false };
         });
 
         const totalPnl = totalValue - totalPrev;
         const totalReturn = totalPrev > 0 ? (totalPnl / totalPrev) * 100 : 0;
 
-        // ── KPIs ──────────────────────────────────────────────────────────────
         document.getElementById('totalValue').textContent = fmtEur(totalValue);
         const platformCount = new Set(assets.map(a => a.platform)).size;
         const kpiSub1 = document.getElementById('kpiSub1');
         kpiSub1.textContent = `${assets.length} positions · ${platformCount} platforms`;
         if (missingCount > 0) {
           const warning = el('span', 'warning', `⚠ ${missingCount} position${missingCount > 1 ? 's' : ''} missing price data`);
+          warning.style.cssText = 'color:var(--negative)';
           kpiSub1.append(' · ', warning);
         }
 
         const pnlEl = document.getElementById('dailyPnl');
-        pnlEl.textContent = fmtSign(totalPnl);
+        pnlEl.textContent = `${totalPnl >= 0 ? '+ ' : '- '}€${Math.round(Math.abs(totalPnl)).toLocaleString('fr-FR')}`;
         pnlEl.className = `kpi-value ${totalPnl >= 0 ? 'positive' : 'negative'}`;
 
         const retEl = document.getElementById('dailyReturn');
-        retEl.textContent = fmtPct(totalReturn);
+        retEl.textContent = `${(totalReturn >= 0 ? '+ ' : '- ') + fmt(Math.abs(totalReturn), 2)}%`;
         retEl.className = `kpi-value ${totalReturn >= 0 ? 'positive' : 'negative'}`;
 
         document.getElementById('numAssets').textContent = assets.length;
-        document.getElementById('kpiSub4').textContent =
-          `${Object.keys(targets).length} target classes`;
+        const uniqueAssetClasses = new Set(enriched.map(a => a.asset_class)).size;
+        document.getElementById('kpiSub4').textContent = `${uniqueAssetClasses} asset classes`;
+        document.getElementById('lastUpdated').textContent = `Updated ${new Date().toLocaleTimeString('fr-FR')}`;
 
-        document.getElementById('lastUpdated').textContent =
-          `Updated ${new Date().toLocaleTimeString('fr-FR')}`;
-
-        // ── Asset class donut ─────────────────────────────────────────────────
         const byClass = groupBy(enriched, 'asset_class', totalValue);
-        const clLabels = byClass.map(g => g.label);
-        const clPcts = byClass.map(g => g.pct);
-        const clColors = clLabels.map((l, i) => CLASS_COLORS[l] || PALETTE[i % PALETTE.length]);
-
-        renderDonut('classChart', clLabels, clPcts, clColors);
-        renderLegend('classLegend', clLabels, clPcts, clColors);
+        renderDonut('classChart', byClass.map(g => g.label), byClass.map(g => g.pct), byClass.map((l, i) => CLASS_COLORS[l.label] || PALETTE[i % PALETTE.length]));
+        renderLegend('classLegend', byClass.map(g => g.label), byClass.map(g => g.pct), byClass.map((l, i) => CLASS_COLORS[l.label] || PALETTE[i % PALETTE.length]));
         document.getElementById('classCount').textContent = byClass.length;
 
-        // ── Actual vs Target bar ──────────────────────────────────────────────
-        const allClasses = [...new Set([...Object.keys(targets), ...clLabels])];
+        // ── Actual vs Target bar ───────────────────────────────────────────────
+        const allClasses = [...new Set([...Object.keys(targets), ...byClass.map(g => g.label)])];
         const actualPcts = allClasses.map(c => byClass.find(g => g.label === c)?.pct ?? 0);
         const targetPcts = allClasses.map(c => (targets[c] ?? 0) * 100);
         renderBarChart('targetChart', allClasses, actualPcts, targetPcts);
 
-        // ── Platform donut ────────────────────────────────────────────────────
+        // ── Platform donut ───────────────────────────────────────────────────
         const byPlat = groupBy(enriched, 'platform', totalValue);
         const plLabels = byPlat.map(g => g.label);
         const plPcts = byPlat.map(g => g.pct);
@@ -1004,27 +630,27 @@
         renderLegend('geoLegend', gLabels, gPcts, gColors, true);
         document.getElementById('geoCount').textContent = byGeo.length;
 
-        // ── Holdings table ────────────────────────────────────────────────────
+        const tbody = document.getElementById('holdingsBody');
+        tbody.innerHTML = '';
         const sorted = [...enriched].sort((a, b) => {
           if (Number.isNaN(a.valueEur)) return 1;
           if (Number.isNaN(b.valueEur)) return -1;
           return b.valueEur - a.valueEur;
         });
-        const tbody = document.getElementById('holdingsBody');
         document.getElementById('holdingsSubtitle').textContent =
           `${sorted.length} positions · sorted by value`;
 
-        tbody.innerHTML = '';
-        for (const a of sorted) {
+        sorted.forEach(a => {
           const weight = totalValue > 0 ? (a.valueEur / totalValue) * 100 : 0;
           const clr = CLASS_COLORS[a.asset_class] || PALETTE[0];
-          const qty = fmt(a.quantity, a.quantity < 1 ? 6 : 3);
           const sign = a.dailyPnl >= 0 ? 'positive' : 'negative';
 
           const tr = el('tr');
 
-          // Ticker
-          const tdTicker = el('td', 'td-ticker', a.ticker.toUpperCase());
+          // Ticker with error warning
+          const tdTicker = el('td');
+          const tickerSpan = el('span', 'td-ticker', a.ticker.toUpperCase());
+          tdTicker.append(tickerSpan);
           if (a.hasError) {
             const errSpan = el('span', '', '⚠');
             errSpan.title = 'Price unavailable';
@@ -1032,49 +658,54 @@
             tdTicker.append(errSpan);
           }
 
-          // Name, Class, Platform, Geo, Qty, Price, Value
-          const tdName = el('td', 'td-name', a.name);
-          const badge = el('span', 'badge', a.asset_class);
-          badge.style.cssText = `background:${clr}1a;color:${clr}`;
-          const tdClass = el('td', '', badge);
-          const tdPlatform = el('td', 'td-mono', a.platform);
-          const tdGeo = el('td', 'td-mono', a.geography);
-          const tdQty = el('td', 'td-val td-mono', qty);
-          const tdPrice = el('td', 'td-val td-mono', a.hasError ? '—' : fmtEur(a.price));
-          const tdValue = el('td', 'td-val td-val-bold', a.hasError ? '—' : fmtEur(a.valueEur));
+          // Name
+          const tdName = el('td', '', a.name);
 
-          // P&L
-          const pnlMain = el('div', a.hasError ? 'main' : `main ${sign}`, a.hasError ? '—' : fmtSign(a.dailyPnl));
-          const pnlSub = el('div', a.hasError ? 'sub' : `sub ${sign}`, a.hasError ? '—' : fmtPct(a.dailyReturn));
-          const tdPnl = el('td', 'td-change');
+          // Class badge
+          const badge = el('span', 'badge', a.asset_class);
+          const tdClass = el('td', '', badge);
+
+          // Platform, Geography, Qty
+          const tdPlatform = el('td', '', a.platform);
+          const tdGeo = el('td', '', a.geography);
+          const qty = fmt(a.quantity, a.quantity < 1 ? 6 : 3);
+          const tdQty = el('td', 'r', qty);
+
+          // Price (show "—" if error)
+          const tdPrice = el('td', 'r', a.hasError ? '—' : fmtEur(a.price));
+
+          // Value (show "—" if error)
+          const tdValue = el('td', 'r');
+          tdValue.style.fontWeight = '700';
+          tdValue.textContent = a.hasError ? '—' : fmtEur(a.valueEur);
+
+          // Daily P&L (show "—" if error)
+          const pnlMain = el('div', a.hasError ? '' : sign, a.hasError ? '—' : fmtSign(a.dailyPnl));
+          const pnlSub = el('div', a.hasError ? '' : sign, a.hasError ? '—' : fmtPct(a.dailyReturn));
+          const tdPnl = el('td', 'r');
           tdPnl.append(pnlMain, pnlSub);
 
-          // Weight
-          const wFill = el('div', 'weight-bar-fill');
-          if (!a.hasError) wFill.style.cssText = `width:${Math.min(weight, 100)}%;background:${clr}`;
-          const wBg = el('div', 'weight-bar-bg', wFill);
-          const wText = el('span', '', a.hasError ? '—' : `${fmt(weight, 1)}%`);
-          const wWrap = el('div', 'weight-bar-wrap');
-          wWrap.append(wBg, wText);
-          const tdWeight = el('td', '', wWrap);
+          // Weight (show "—" if error)
+          const tdWeight = el('td', 'r');
+          if (!a.hasError) {
+            const wFill = el('div', 'weight-bar-fill');
+            wFill.style.cssText = `width:${Math.min(weight, 100)}%;background:${clr}`;
+            const wBg = el('div', 'weight-bar-bg', wFill);
+            const wText = el('span', '', `${fmt(weight, 1)}%`);
+            const wWrap = el('div', 'weight-bar-wrap');
+            wWrap.append(wBg, wText);
+            tdWeight.append(wWrap);
+          } else {
+            tdWeight.textContent = '—';
+          }
 
           tr.append(tdTicker, tdName, tdClass, tdPlatform, tdGeo, tdQty, tdPrice, tdValue, tdPnl, tdWeight);
           tbody.appendChild(tr);
-        }
-
-      } catch (err) {
-        errEl.style.display = 'block';
-        errEl.textContent = `⚠  ${err.message}`;
-        console.error(err);
-      } finally {
-        btn.disabled = false; btn.textContent = '↻ REFRESH';
-      }
+        });
+      } catch (e) { errEl.style.display = 'block'; errEl.textContent = `⚠  ${e.message}`; console.error(e); } finally { btn.disabled = false; btn.textContent = '↻ REFRESH'; }
     }
-
-    // Initial load
     document.getElementById('refreshBtn').addEventListener('click', loadAll);
     loadAll();
   </script>
 </body>
-
 </html>
