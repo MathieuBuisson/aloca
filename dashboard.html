@@ -15,19 +15,21 @@
     </script>
   <style>
     :root {
-      --bg: #1a1816;
-      --bg-gradient: radial-gradient(circle at top right, #3d342d, #1a1816 60%);
-      --surface: rgba(40, 36, 32, 0.45); /* Warm glass morphic surface */
+      --bg: #1e2028;
       --surface-bright: rgba(60, 55, 50, 0.7);
-      --border: rgba(255, 255, 255, 0.08);
-      --border2: rgba(232, 160, 32, 0.15);
+      --bg-gradient: radial-gradient(circle at 80% 0%, #3a415a 0%, #1e2028 100%);
+      --surface: rgba(255, 255, 255, 0.03);
+      --surface-warm: rgba(60, 50, 40, 0.2);
+      --border: rgba(255, 255, 255, 0.12);
+      --border2: rgba(96, 165, 250, 0.25);
 
       --text: #f8f8f2;
       --muted: #a6a69a;
       --muted2: #4a4540;
 
-      --accent: #e8a020;
+      --accent: #cbd5e1;
       --accent-teal: #2ec4b6;
+      --accent-glow: rgba(203, 213, 225, 0.3);
       --positive: #2dd4a0;
       --negative: #f06070;
 
@@ -39,7 +41,9 @@
       --radius-md: 12px;
     }
 
-    *, *::before, *::after {
+    *,
+    *::before,
+    *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
@@ -109,9 +113,9 @@
     }
 
     .refresh-btn {
-      background: var(--surface-bright);
-      border: 1px solid var(--border);
-      color: var(--text);
+      background: rgba(96, 165, 250, 0.1);
+      border: 1px solid rgba(96, 165, 250, 0.2);
+      color: var(--accent);
       padding: 10px 20px;
       border-radius: 100px;
       font-family: var(--font-b);
@@ -122,8 +126,10 @@
     }
 
     .refresh-btn:hover {
-      background: var(--accent);
-      color: #000;
+      background: rgba(96, 165, 250, 0.2);
+      border-color: var(--accent);
+      color: #ffffff;
+      box-shadow: 0 0 15px var(--accent-glow);
       transform: translateY(-1px);
     }
 
@@ -155,23 +161,26 @@
       margin-bottom: 20px;
     }
 
-    .kpi-card {
-      background: var(--surface);
-      backdrop-filter: blur(12px);
+    .kpi-card, .chart-card, .holdings-card {
+      background: var(--surface-warm);
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
-      padding: 20px;
-      transition: transform 0.3s ease, border-color 0.3s ease;
+      box-shadow: 
+        inset 0 1px 1px rgba(255, 255, 255, 0.1),
+        0 10px 30px rgba(0, 0, 0, 0.4);
+      transition: all 0.4s ease;
     }
 
-    .kpi-card:hover {
-      border-color: var(--border2);
-      transform: translateY(-2px);
-    }
+    .kpi-card { padding: 20px; }
+    .chart-card { padding: 30px; }
+    .holdings-card { padding: 32px; margin-top: 24px; }
 
-    .kpi-card.primary {
-      background: linear-gradient(145deg, rgba(232, 160, 32, 0.1), rgba(26, 24, 22, 0.4));
-      border-color: var(--border2);
+    .kpi-card:hover, .chart-card:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-4px);
     }
 
     .kpi-label {
@@ -192,9 +201,13 @@
 
     .kpi-card.primary .kpi-value {
       font-size: 48px;
-      background: linear-gradient(to bottom, #fff, var(--accent));
+      font-weight: 700;
+      background: linear-gradient(to bottom, #ffffff 30%, var(--accent) 100%);
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
+      /* Added shadow to ensure readability against glass */
+      filter: drop-shadow(0 0 10px rgba(96, 165, 250, 0.2));
     }
 
     .kpi-sub {
@@ -215,18 +228,17 @@
       margin-bottom: 20px;
     }
 
-    .charts-row.two { grid-template-columns: 1fr 1fr; }
-    .charts-row.three { grid-template-columns: 1fr 1fr 1fr; }
-
-    .chart-card {
-      background: var(--surface);
-      backdrop-filter: blur(12px);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 30px;
+    .charts-row.two {
+      grid-template-columns: 1fr 1fr;
     }
 
-    .chart-card.span2 { grid-column: span 2; }
+    .charts-row.three {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    .chart-card.span2 {
+      grid-column: span 2;
+    }
 
     .card-header {
       display: flex;
@@ -251,66 +263,146 @@
     }
 
     /* ─── Donut Center ─── */
-    .donut-wrap { position: relative; max-width: 220px; margin: 0 auto; }
+    .donut-wrap {
+      position: relative;
+      max-width: 220px;
+      margin: 0 auto;
+    }
+
     .donut-center {
       position: absolute;
-      top: 50%; left: 50%;
+      top: 50%;
+      left: 50%;
       transform: translate(-50%, -50%);
       text-align: center;
       pointer-events: none;
     }
-    .donut-center-val { font-family: var(--font-h); font-size: 24px; font-weight: 700; color: var(--text); }
-    .donut-center-lbl { font-family: var(--font-m); font-size: 12px; color: var(--muted); }
 
-    /* ─── Legend ─── */
-    .legend { display: flex; flex-wrap: wrap; gap: 10px 16px; margin-top: 18px; justify-content: center; }
-    .legend.vertical { flex-direction: column; justify-content: flex-start; margin-top: 0; gap: 12px; }
-    .legend-item { display: flex; align-items: center; gap: 8px; font-family: var(--font-m); font-size: 11px; color: var(--muted); }
-    .legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
-    .legend-pct { color: var(--text); }
-
-    /* ─── Geo layout (donut + legend side by side) ─── */
-    .geo-layout { display: flex; align-items: center; gap: 28px; }
-    .geo-layout .donut-wrap { flex-shrink: 0; }
-
-    /* ─── Holdings Table ─── */
-    .holdings-card {
-      background: var(--surface);
-      backdrop-filter: blur(12px);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 32px;
-      margin-top: 24px;
+    .donut-center-val {
+      font-family: var(--font-h);
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text);
     }
 
-    .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-spacing: 0 8px; border-collapse: separate; min-width: 900px; }
-    th { text-align: left; padding: 0 16px 16px; font-family: var(--font-m); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
-    th[data-sort] { cursor: pointer; user-select: none; }
-    th[data-sort]:hover { color: var(--text); }
-    th.r { text-align: right; }
+    .donut-center-lbl {
+      font-family: var(--font-m);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ─── Legend ─── */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 16px;
+      margin-top: 18px;
+      justify-content: center;
+    }
+
+    .legend.vertical {
+      flex-direction: column;
+      justify-content: flex-start;
+      margin-top: 0;
+      gap: 12px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-m);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .legend-pct {
+      color: var(--text);
+    }
+
+    /* ─── Geo layout (donut + legend side by side) ─── */
+    .geo-layout {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .geo-layout .donut-wrap {
+      flex-shrink: 0;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-spacing: 0 8px;
+      border-collapse: separate;
+      min-width: 900px;
+    }
+
+    th {
+      text-align: left;
+      padding: 0 16px 16px;
+      font-family: var(--font-m);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    th[data-sort] {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    th[data-sort]:hover {
+      color: var(--text);
+    }
+
+    th.r {
+      text-align: right;
+    }
 
     td {
-      background: rgba(255, 255, 255, 0.02);
+      background: rgba(255, 255, 255, 0.01);
       padding: 16px;
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
       font-size: 13px;
     }
 
-    td:first-child { border-left: 1px solid var(--border); border-radius: 12px 0 0 12px; }
-    td:last-child { border-right: 1px solid var(--border); border-radius: 0 12px 12px 0; }
+    td:first-child {
+      border-left: 1px solid var(--border);
+      border-radius: 12px 0 0 12px;
+    }
+
+    td:last-child {
+      border-right: 1px solid var(--border);
+      border-radius: 0 12px 12px 0;
+    }
 
     tr:hover td {
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(96, 165, 250, 0.08);
       border-color: var(--border2);
+      cursor: pointer;
     }
 
     .td-ticker {
       font-family: var(--font-m);
       font-weight: 600;
       color: var(--accent);
-      background: rgba(232, 160, 32, 0.1);
+      background: rgba(203, 213, 225, 0.08);
+      border: 1px solid rgba(203, 213, 225, 0.15);
+      letter-spacing: 0.02em;
       padding: 4px 8px;
       border-radius: 6px;
     }
@@ -325,20 +417,54 @@
       text-transform: uppercase;
     }
 
-    .weight-bar-bg { background: var(--muted2); height: 6px; width: 60px; border-radius: 10px; overflow: hidden; }
-    .weight-bar-fill { height: 100%; border-radius: 10px; }
-    .weight-bar-wrap { display: flex; align-items: center; justify-content: flex-end; gap: 8px; font-family: var(--font-m); font-size: 11px; color: var(--muted); }
+    .weight-bar-bg {
+      background: var(--muted2);
+      height: 6px;
+      width: 60px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .weight-bar-fill {
+      height: 100%;
+      border-radius: 10px;
+    }
+
+    .weight-bar-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      font-family: var(--font-m);
+      font-size: 11px;
+      color: var(--muted);
+    }
 
     /* ─── Colour helpers ─── */
-    .positive { color: var(--positive); }
-    .negative { color: var(--negative); }
+    .positive {
+      color: var(--positive);
+    }
+
+    .negative {
+      color: var(--negative);
+    }
 
     /* ─── Animations ─── */
     @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
-    .kpi-card, .chart-card, .holdings-card {
+
+    .kpi-card,
+    .chart-card,
+    .holdings-card {
       animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
   </style>
@@ -677,67 +803,67 @@
             `${sorted.length} positions · sorted by ${sortLabel.toLowerCase()} ${sortAsc ? '(asc)' : '(desc)'}`;
 
           sorted.forEach(a => {
-          const weight = totalValue > 0 ? (a.valueEur / totalValue) * 100 : 0;
-          const clr = CLASS_COLORS[a.asset_class] || PALETTE[0];
-          const sign = a.dailyPnl >= 0 ? 'positive' : 'negative';
+            const weight = totalValue > 0 ? (a.valueEur / totalValue) * 100 : 0;
+            const clr = CLASS_COLORS[a.asset_class] || PALETTE[0];
+            const sign = a.dailyPnl >= 0 ? 'positive' : 'negative';
 
-          const tr = el('tr');
+            const tr = el('tr');
 
-          // Ticker with error warning
-          const tdTicker = el('td');
-          const tickerSpan = el('span', 'td-ticker', a.ticker.toUpperCase());
-          tdTicker.append(tickerSpan);
-          if (a.hasError) {
-            const errSpan = el('span', '', '⚠');
-            errSpan.title = 'Price unavailable';
-            errSpan.style.cssText = 'color:var(--negative);margin-left:4px';
-            tdTicker.append(errSpan);
-          }
+            // Ticker with error warning
+            const tdTicker = el('td');
+            const tickerSpan = el('span', 'td-ticker', a.ticker.toUpperCase());
+            tdTicker.append(tickerSpan);
+            if (a.hasError) {
+              const errSpan = el('span', '', '⚠');
+              errSpan.title = 'Price unavailable';
+              errSpan.style.cssText = 'color:var(--negative);margin-left:4px';
+              tdTicker.append(errSpan);
+            }
 
-          // Name
-          const tdName = el('td', '', a.name);
+            // Name
+            const tdName = el('td', '', a.name);
 
-          // Class badge
-          const badge = el('span', 'badge', a.asset_class);
-          badge.style.cssText = `background:${clr}1a;color:${clr}`;
-          const tdClass = el('td', '', badge);
+            // Class badge
+            const badge = el('span', 'badge', a.asset_class);
+            badge.style.cssText = `background:${clr}1a;color:${clr}`;
+            const tdClass = el('td', '', badge);
 
-          // Platform, Geography, Qty
-          const tdPlatform = el('td', '', a.platform);
-          const tdGeo = el('td', '', a.geography);
-          const qty = fmtQuantity(a.quantity);
-          const tdQty = el('td', 'r', qty);
+            // Platform, Geography, Qty
+            const tdPlatform = el('td', '', a.platform);
+            const tdGeo = el('td', '', a.geography);
+            const qty = fmtQuantity(a.quantity);
+            const tdQty = el('td', 'r', qty);
 
-          // Price (show "—" if error)
-          const tdPrice = el('td', 'r', a.hasError ? '—' : fmtEur(a.price));
+            // Price (show "—" if error)
+            const tdPrice = el('td', 'r', a.hasError ? '—' : fmtEur(a.price));
 
-          // Value (show "—" if error)
-          const tdValue = el('td', 'r');
-          tdValue.style.fontWeight = '700';
-          tdValue.textContent = a.hasError ? '—' : `€\u202f${Math.round(a.valueEur).toLocaleString('fr-FR')}`;
+            // Value (show "—" if error)
+            const tdValue = el('td', 'r');
+            tdValue.style.fontWeight = '700';
+            tdValue.textContent = a.hasError ? '—' : `€\u202f${Math.round(a.valueEur).toLocaleString('fr-FR')}`;
 
-          // Daily P&L (show "—" if error)
-          const pnlMain = el('div', a.hasError ? '' : sign, a.hasError ? '—' : fmtSign(a.dailyPnl));
-          const pnlSub = el('div', a.hasError ? '' : sign, a.hasError ? '—' : fmtPct(a.dailyReturn));
-          const tdPnl = el('td', 'r');
-          tdPnl.append(pnlMain, pnlSub);
+            // Daily P&L (show "—" if error)
+            const pnlMain = el('div', a.hasError ? '' : sign, a.hasError ? '—' : fmtSign(a.dailyPnl));
+            const pnlSub = el('div', a.hasError ? '' : sign, a.hasError ? '—' : fmtPct(a.dailyReturn));
+            const tdPnl = el('td', 'r');
+            tdPnl.append(pnlMain, pnlSub);
 
-          // Weight (show "—" if error)
-          const tdWeight = el('td', 'r');
-          if (!a.hasError) {
-            const wFill = el('div', 'weight-bar-fill');
-            wFill.style.cssText = `width:${Math.min(weight, 100)}%;background:${clr}`;
-            const wBg = el('div', 'weight-bar-bg', wFill);
-            const wText = el('span', '', `${fmt(weight, 1)}%`);
-            const wWrap = el('div', 'weight-bar-wrap');
-            wWrap.append(wBg, wText);
-            tdWeight.append(wWrap);
-          } else {
-            tdWeight.textContent = '—';
-          }
+            // Weight (show "—" if error)
+            const tdWeight = el('td', 'r');
+            if (!a.hasError) {
+              const wFill = el('div', 'weight-bar-fill');
+              wFill.style.cssText = `width:${Math.min(weight, 100)}%;background:${clr}`;
+              const wBg = el('div', 'weight-bar-bg', wFill);
+              const wText = el('span', '', `${fmt(weight, 1)}%`);
+              const wWrap = el('div', 'weight-bar-wrap');
+              wWrap.append(wBg, wText);
+              tdWeight.append(wWrap);
+            } else {
+              tdWeight.textContent = '—';
+            }
 
-          tr.append(tdTicker, tdName, tdClass, tdPlatform, tdGeo, tdQty, tdPrice, tdValue, tdPnl, tdWeight);
-          tbody.appendChild(tr);
+            tr.append(tdTicker, tdName, tdClass, tdPlatform, tdGeo, tdQty, tdPrice, tdValue, tdPnl, tdWeight);
+            tbody.appendChild(tr);
           });
         }
 
@@ -749,4 +875,5 @@
     loadAll();
   </script>
 </body>
+
 </html>
