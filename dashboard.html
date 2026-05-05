@@ -72,9 +72,11 @@
       justify-content: space-between;
       padding: 18px 40px;
       margin-bottom: 0;
-      background: rgba(26, 24, 22, 0.6);
-      backdrop-filter: blur(20px);
+      background: var(--surface-warm);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
     }
 
     .logo {
@@ -84,11 +86,42 @@
     }
 
     .logo-mark {
-      width: 24px;
-      height: 24px;
-      background: linear-gradient(135deg, var(--accent), var(--accent-teal));
-      border-radius: 6px;
-      box-shadow: 0 0 15px rgba(232, 160, 32, 0.3);
+      position: relative;
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, rgba(203, 213, 225, 0.4), rgba(46, 196, 182, 0.2));
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    /* The "A" Silhouette using a pseudo-element */
+    .logo-mark::before {
+      content: '';
+      width: 14px;
+      height: 14px;
+      border-left: 3px solid var(--accent);
+      border-top: 3px solid var(--accent);
+      transform: rotate(45deg) translate(2px, 2px);
+      filter: drop-shadow(0 0 4px var(--accent-teal));
+    }
+
+    /* A subtle highlight streak across the glass */
+    .logo-mark::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+      transform: rotate(30deg);
+      pointer-events: none;
     }
 
     .logo-text {
@@ -184,9 +217,8 @@
     }
 
     .kpi-label {
-      font-size: 12px;
-      font-weight: 600;
-      text-transform: uppercase;
+      font-size: 16px;
+      font-weight: 700;
       letter-spacing: 0.05em;
       color: var(--muted);
       margin-bottom: 6px;
@@ -202,12 +234,12 @@
     .kpi-card.primary .kpi-value {
       font-size: 48px;
       font-weight: 700;
-      background: linear-gradient(to bottom, #ffffff 30%, var(--accent) 100%);
+      background: linear-gradient(to bottom, #cbd5e1 20%, #94a3b8 100%);
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
       /* Added shadow to ensure readability against glass */
-      filter: drop-shadow(0 0 10px rgba(96, 165, 250, 0.2));
+      filter: drop-shadow(0 0 8px rgba(203, 213, 225, 0.15));
     }
 
     .kpi-sub {
@@ -249,16 +281,15 @@
 
     .card-title {
       font-family: var(--font-h);
-      font-size: 14px;
+      font-size: 16px;
       font-weight: 700;
       color: var(--text);
-      text-transform: uppercase;
       letter-spacing: 0.05em;
     }
 
     .card-subtitle {
       font-family: var(--font-m);
-      font-size: 10px;
+      font-size: 12px;
       color: var(--muted);
     }
 
@@ -402,7 +433,7 @@
       color: var(--accent);
       background: rgba(203, 213, 225, 0.08);
       border: 1px solid rgba(203, 213, 225, 0.15);
-      letter-spacing: 0.02em;
+      letter-spacing: 0.06em;
       padding: 4px 8px;
       border-radius: 6px;
     }
@@ -514,8 +545,7 @@
     <div class="charts-row three">
       <div class="chart-card">
         <div class="card-header">
-          <span class="card-title">Allocation</span>
-          <span class="card-subtitle">by asset class</span>
+          <span class="card-title">By Asset Class</span>
         </div>
         <div class="donut-wrap">
           <canvas id="classChart" height="220"></canvas>
@@ -592,7 +622,6 @@
       <div class="chart-card">
         <div class="card-header">
           <span class="card-title">Current allocation vs Target</span>
-          <span class="card-subtitle">rebalancing</span>
         </div>
         <canvas id="targetChart" height="220"></canvas>
       </div>
@@ -600,10 +629,32 @@
   </main>
 
   <script>
-    // [The original JavaScript logic from dashboard.html remains unchanged here]
-    const CLASS_COLORS = { 'Equities': '#60a5fa', 'Bonds': '#34d399', 'Real Estate': '#a78bfa', 'Crypto': '#e8a020', 'Cash': '#64748b' };
-    const PALETTE = ['#e8a020', '#60a5fa', '#a78bfa', '#34d399', '#f87171', '#fb923c', '#38bdf8', '#c084fc', '#4ade80', '#fbbf24'];
-    const CHART_DEFAULTS = { tooltip: { backgroundColor: '#16161f', borderColor: '#252540', borderWidth: 1, titleColor: '#e2e2ef', bodyColor: '#a6a69a', titleFont: { family: 'DM Mono', size: 11 }, bodyFont: { family: 'DM Mono', size: 11 }, padding: 12 } };
+      const CLASS_COLORS = { 
+        'Equities': '#cbd5e1',    /* Misty Slate */
+        'Bonds': '#94a3b8',       /* Medium Slate */
+        'Real Estate': '#2ec4b6', /* Deep Teal */
+        'Crypto': '#7dd3fc',      /* Ice Cyan */
+        'Cash': '#475569'         /* Dark Slate */
+      };
+      const PALETTE = [
+        '#cbd5e1', '#7dd3fc', '#2ec4b6', '#94a3b8',
+        '#99f6e4', '#bae6fd', '#34d399', '#64748b',
+        '#475569', '#cfd8dc'
+      ];
+      const CHART_DEFAULTS = {
+      tooltip: {
+        backgroundColor: 'rgba(30, 32, 40, 0.9)',
+        borderColor: 'rgba(203, 213, 225, 0.3)',
+        borderWidth: 1,
+        titleColor: '#ffffff',
+        bodyColor: '#cbd5e1', // Match var(--accent)
+        titleFont: { family: 'DM Mono', size: 11, weight: 'bold' },
+        bodyFont: { family: 'DM Mono', size: 11 },
+        padding: 12,
+        cornerRadius: 8,
+        displayColors: false // Cleaner "Misty" look
+      }
+    };
     const fmt = (v, d = 2) => new Intl.NumberFormat('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d }).format(v);
     const fmtEur = (v) => `€\u202f${fmt(v)}`;
     const fmtPct = (v) => `${(v >= 0 ? '+' : '') + fmt(v, 2)}%`;
@@ -622,7 +673,7 @@
       const ctx = document.getElementById(id).getContext('2d');
       charts[id] = new Chart(ctx, {
         type: 'doughnut',
-        data: { labels, datasets: [{ data: pcts, backgroundColor: colors, borderColor: 'transparent', borderWidth: 0, hoverOffset: 8 }] },
+        data: { labels, datasets: [{ data: pcts, backgroundColor: colors, borderColor: '#1e2028', borderWidth: 2, hoverOffset: 8 }] },
         options: { cutout: '78%', plugins: { legend: { display: false }, tooltip: { ...CHART_DEFAULTS.tooltip } }, animation: { duration: 800, easing: 'easeOutQuart' } }
       });
     }
@@ -631,11 +682,33 @@
       destroyChart(id);
       const ctx = document.getElementById(id).getContext('2d');
       const barColors = labels.map(l => CLASS_COLORS[l] || PALETTE[0]);
-      const targetColors = barColors.map(c => `${c}33`); // 20% opacity version of actual bar colors
+      const targetColors = barColors.map(c => `${c}33`); 
+      
       charts[id] = new Chart(ctx, {
         type: 'bar',
-        data: { labels, datasets: [{ label: 'Actual', data: actualPcts, backgroundColor: barColors, borderRadius: 6 }, { label: 'Target', data: targetPcts, backgroundColor: targetColors, borderColor: barColors, borderWidth: 2, borderDash: [4, 4], borderRadius: 6 }] },
-        options: { scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#a6a69a' } }, x: { grid: { display: false }, ticks: { color: '#a6a69a' } } }, plugins: { legend: { display: false } } }
+        data: { 
+          labels, 
+          datasets: [
+            { label: 'Actual', data: actualPcts, backgroundColor: barColors, borderRadius: 6 }, 
+            { label: 'Target', data: targetPcts, backgroundColor: targetColors, borderColor: barColors, borderWidth: 2, borderDash: [4, 4], borderRadius: 6 }
+          ] 
+        },
+        options: { 
+          scales: { 
+            y: { 
+              grid: { color: 'rgba(203, 213, 225, 0.05)' }, // Subtle Misty Slate grid
+              ticks: { color: '#94a3b8' } // Cooler slate-gray labels
+            }, 
+            x: { 
+              grid: { display: false }, 
+              ticks: { color: '#94a3b8' } 
+            } 
+          }, 
+          plugins: { 
+            legend: { display: false },
+            tooltip: { ...CHART_DEFAULTS.tooltip } // Added the spread here
+          } 
+        }
       });
     }
 
