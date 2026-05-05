@@ -86,51 +86,42 @@
     }
 
     .logo-mark {
-      position: relative;
-      width: 32px;
-      height: 32px;
-      background: linear-gradient(135deg, rgba(203, 213, 225, 0.4), rgba(46, 196, 182, 0.2));
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(4px);
+      width: 42px;
+      height: 42px;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
+      align-items: flex-end; /* Aligns bars to the bottom */
+      gap: 3px;
+      padding: 6px;
+      background: var(--surface-warm);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 8px;
+      border: 1px solid var(--border);
       box-shadow: 0 0 15px var(--accent-glow);
     }
 
-    /* The "A" Silhouette using a pseudo-element */
-    .logo-mark::before {
-      content: '';
-      width: 14px;
-      height: 14px;
-      border-left: 3px solid var(--accent);
-      border-top: 3px solid var(--accent);
-      transform: rotate(45deg) translate(2px, 2px);
-      filter: drop-shadow(0 0 4px var(--accent-teal));
+    .logo-mark div {
+      flex: 1;
+      border-radius: 2px;
+      background: linear-gradient(to top, var(--accent-teal), var(--accent));
+      opacity: 0.8;
+      box-shadow: 0 0 8px var(--accent-glow);
     }
 
-    /* A subtle highlight streak across the glass */
-    .logo-mark::after {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-      transform: rotate(30deg);
-      pointer-events: none;
-    }
+    /* Ascending Heights */
+    .logo-mark div:nth-child(1) { height: 30%; opacity: 0.4; }
+    .logo-mark div:nth-child(2) { height: 50%; opacity: 0.6; }
+    .logo-mark div:nth-child(3) { height: 75%; opacity: 0.8; }
+    .logo-mark div:nth-child(4) { height: 100%; opacity: 1; }
 
     .logo-text {
       font-family: var(--font-h);
-      font-size: 18px;
+      font-size: 19px;
       font-weight: 700;
       letter-spacing: 0.02em;
       color: var(--text);
       text-transform: none;
+      margin-left: 18px;
     }
 
     .header-right {
@@ -505,7 +496,12 @@
 
   <header>
     <div class="logo">
-      <div class="logo-mark"></div>
+      <div class="logo-mark">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>      
       <span class="logo-text">Aloca — Portfolio</span>
     </div>
     <div class="header-right">
