@@ -1,0 +1,9 @@
+# exclude .gitignore and similar from the generated tarball
+.git*         export-ignore
+build/        export-ignore
+dist/         export-ignore
+*test*        export-ignore
+.github/      export-ignore
+AGENTS*       export-ignore
+SPEC*         export-ignore
+*lock*        export-ignore

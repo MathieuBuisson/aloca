@@ -93,6 +93,3 @@ dist
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
-
-# Project specific - development data
-devdata.json
