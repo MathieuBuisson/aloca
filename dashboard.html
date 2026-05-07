@@ -86,8 +86,8 @@
     }
 
     .logo-mark {
-      width: 42px;
-      height: 42px;
+      width: 40px;
+      height: 40px;
       display: flex;
       align-items: flex-end; /* Aligns bars to the bottom */
       gap: 3px;
@@ -132,7 +132,7 @@
 
     .last-updated {
       font-family: var(--font-m);
-      font-size: 11px;
+      font-size: 15px;
       color: var(--muted);
     }
 
@@ -236,7 +236,7 @@
 
     .kpi-sub {
       font-family: var(--font-m);
-      font-size: 11px;
+      font-size: 15px;
       color: var(--muted);
       margin-top: 6px;
     }
@@ -281,7 +281,7 @@
 
     .card-subtitle {
       font-family: var(--font-m);
-      font-size: 12px;
+      font-size: 15px;
       color: var(--muted);
     }
 
@@ -310,7 +310,7 @@
 
     .donut-center-lbl {
       font-family: var(--font-m);
-      font-size: 12px;
+      font-size: 15px;
       color: var(--muted);
     }
 
@@ -335,7 +335,7 @@
       align-items: center;
       gap: 8px;
       font-family: var(--font-m);
-      font-size: 11px;
+      font-size: 15px;
       color: var(--muted);
     }
 
@@ -460,7 +460,7 @@
       justify-content: flex-end;
       gap: 8px;
       font-family: var(--font-m);
-      font-size: 11px;
+      font-size: 14px;
       color: var(--muted);
     }
 
@@ -660,9 +660,12 @@
       }
     };
     const fmt = (v, d = 2) => new Intl.NumberFormat('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d }).format(v);
-    const fmtEur = (v) => `€\u202f${fmt(v)}`;
+    const fmtEur = (v) => `€ ${fmt(v)}`;
     const fmtPct = (v) => `${(v >= 0 ? '+' : '') + fmt(v, 2)}%`;
-    const fmtSign = (v) => (v >= 0 ? '+' : '') + fmtEur(v);
+    const fmtSign = (v) => v >= 0 ? `€ +${fmt(v)}` : `€ -${fmt(Math.abs(v))}`;
+    const fmtSignWhole = (v) => v >= 0
+      ? `€ +${Math.round(v).toLocaleString('fr-FR')}`
+      : `€ -${Math.round(Math.abs(v)).toLocaleString('fr-FR')}`;
     const fmtQuantity = (v) => {
       if (v > 100) return Math.round(v).toLocaleString('fr-FR');
       if (v > 10) return fmt(v, 1);
@@ -707,11 +710,17 @@
           scales: {
             y: {
               grid: { color: 'rgba(203, 213, 225, 0.05)' }, // Subtle Misty Slate grid
-              ticks: { color: '#94a3b8' } // Cooler slate-gray labels
+              ticks: { 
+  color: '#94a3b8',
+  font: { family: "'DM Mono', monospace", size: 15 }
+}
             },
             x: {
               grid: { display: false },
-              ticks: { color: '#94a3b8' }
+              ticks: { 
+                color: '#a6a69a',
+                font: { family: "'DM Mono', monospace", size: 15 }
+              }
             }
           },
           plugins: {
@@ -809,7 +818,7 @@
         }
 
         const pnlEl = document.getElementById('dailyPnl');
-        pnlEl.textContent = `${totalPnl >= 0 ? '+ ' : '- '}€ ${Math.round(Math.abs(totalPnl)).toLocaleString('fr-FR')}`;
+        pnlEl.textContent = fmtSignWhole(totalPnl);
         pnlEl.className = `kpi-value ${totalPnl >= 0 ? 'positive' : 'negative'}`;
 
         const retEl = document.getElementById('dailyReturn');
