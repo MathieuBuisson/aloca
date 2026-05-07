@@ -687,56 +687,69 @@
     let sortAsc = false;
     let enrichedData = [];
     const charts = {};
-    function destroyChart(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
 
     function renderDonut(id, labels, pcts, colors) {
-      destroyChart(id);
-      const ctx = document.getElementById(id).getContext('2d');
-      charts[id] = new Chart(ctx, {
-        type: 'doughnut',
-        data: { labels, datasets: [{ data: pcts, backgroundColor: colors, borderColor: '#1e2028', borderWidth: 2, hoverOffset: 8 }] },
-        options: { cutout: '70%', plugins: { legend: { display: false }, tooltip: { ...CHART_DEFAULTS.tooltip } }, animation: { duration: 800, easing: 'easeOutQuart' } }
-      });
+      if (charts[id]) {
+        charts[id].data.labels = labels;
+        charts[id].data.datasets[0].data = pcts;
+        charts[id].data.datasets[0].backgroundColor = colors;
+        charts[id].update();
+      } else {
+        const ctx = document.getElementById(id).getContext('2d');
+        charts[id] = new Chart(ctx, {
+          type: 'doughnut',
+          data: { labels, datasets: [{ data: pcts, backgroundColor: colors, borderColor: '#1e2028', borderWidth: 2, hoverOffset: 8 }] },
+          options: { cutout: '70%', plugins: { legend: { display: false }, tooltip: { ...CHART_DEFAULTS.tooltip } }, animation: { duration: 800, easing: 'easeOutQuart' } }
+        });
+      }
     }
 
     function renderBarChart(id, labels, actualPcts, targetPcts) {
-      destroyChart(id);
-      const ctx = document.getElementById(id).getContext('2d');
       const barColors = labels.map(l => CLASS_COLORS[l] || PALETTE[0]);
       const targetColors = barColors.map(c => `${c}33`);
 
-      charts[id] = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels,
-          datasets: [
-            { label: 'Actual', data: actualPcts, backgroundColor: barColors, borderRadius: 6 },
-            { label: 'Target', data: targetPcts, backgroundColor: targetColors, borderColor: barColors, borderWidth: 2, borderDash: [4, 4], borderRadius: 6 }
-          ]
-        },
-        options: {
-          scales: {
-            y: {
-              grid: { color: 'rgba(203, 213, 225, 0.05)' }, // Subtle Misty Slate grid
-              ticks: {
+      if (charts[id]) {
+        charts[id].data.labels = labels;
+        charts[id].data.datasets[0].data = actualPcts;
+        charts[id].data.datasets[0].backgroundColor = barColors;
+        charts[id].data.datasets[1].data = targetPcts;
+        charts[id].data.datasets[1].backgroundColor = targetColors;
+        charts[id].update();
+      } else {
+        const ctx = document.getElementById(id).getContext('2d');
+        charts[id] = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [
+              { label: 'Actual', data: actualPcts, backgroundColor: barColors, borderRadius: 6 },
+              { label: 'Target', data: targetPcts, backgroundColor: targetColors, borderColor: barColors, borderWidth: 2, borderDash: [4, 4], borderRadius: 6 }
+            ]
+          },
+          options: {
+            scales: {
+              y: {
+                grid: { color: 'rgba(203, 213, 225, 0.05)' }, // Subtle Misty Slate grid
+                ticks: {
   color: '#94a3b8',
   font: { family: "'DM Mono', monospace", size: 15 }
 }
-            },
-            x: {
-              grid: { display: false },
-              ticks: {
-                color: '#a6a69a',
-                font: { family: "'DM Mono', monospace", size: 15 }
+              },
+              x: {
+                grid: { display: false },
+                ticks: {
+                  color: '#a6a69a',
+                  font: { family: "'DM Mono', monospace", size: 15 }
+                }
               }
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: { ...CHART_DEFAULTS.tooltip } // Added the spread here
             }
-          },
-          plugins: {
-            legend: { display: false },
-            tooltip: { ...CHART_DEFAULTS.tooltip } // Added the spread here
           }
-        }
-      });
+        });
+      }
     }
 
     function renderLegend(containerId, labels, pcts, colors, vertical = false) {
@@ -873,6 +886,7 @@
         const renderTable = () => {
           const tbody = document.getElementById('holdingsBody');
           tbody.innerHTML = '';
+          const frag = document.createDocumentFragment();
           const sorted = [...enriched].sort((a, b) => {
             if (Number.isNaN(a.valueEur)) return 1;
             if (Number.isNaN(b.valueEur)) return -1;
@@ -954,8 +968,9 @@
             }
 
             tr.append(tdTicker, tdName, tdClass, tdPlatform, tdGeo, tdQty, tdPrice, tdValue, tdPnl, tdWeight);
-            tbody.appendChild(tr);
+            frag.appendChild(tr);
           });
+          tbody.appendChild(frag);
         }
 
         // Initial render
@@ -980,6 +995,7 @@
     function renderTableFromData() {
       const tbody = document.getElementById('holdingsBody');
       tbody.innerHTML = '';
+      const frag = document.createDocumentFragment();
       const totalValue = enrichedData.reduce((sum, a) => sum + (a.valueEur || 0), 0);
       const sorted = [...enrichedData].sort((a, b) => {
         if (Number.isNaN(a.valueEur)) return 1;
@@ -1054,8 +1070,9 @@
         }
 
         tr.append(tdTicker, tdName, tdClass, tdPlatform, tdGeo, tdQty, tdPrice, tdValue, tdPnl, tdWeight);
-        tbody.appendChild(tr);
+        frag.appendChild(tr);
       });
+      tbody.appendChild(frag);
     }
 
     loadAll();
