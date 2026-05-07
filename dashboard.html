@@ -688,6 +688,125 @@
     let enrichedData = [];
     const charts = {};
 
+    async function fetchData() {
+      const pfRes = await fetch('/portfolio');
+      if (!pfRes.ok) throw new Error(`Cannot load portfolio.json (${pfRes.status})`);
+      const { assets, targets } = await pfRes.json();
+
+      const tickers = assets.map(a => a.ticker).join(',');
+      const types = assets.map(a => a.asset_class === 'Crypto' ? 'crypto' : 'etf').join(',');
+      const qRes = await fetch(`/quotes?tickers=${encodeURIComponent(tickers)}&types=${encodeURIComponent(types)}`);
+      if (!qRes.ok) throw new Error(`Quotes endpoint error (${qRes.status})`);
+      const quotes = await qRes.json();
+
+      return { assets, quotes, targets };
+    }
+
+    function processPortfolio(assets, quotes) {
+      const priceMap = {};
+      for (const q of quotes) if (!q.error) priceMap[q.ticker] = { price: q.priceEur, prev: q.previousCloseEur };
+
+      let totalValue = 0, totalPrev = 0;
+      let missingCount = 0;
+      const enriched = assets.map(a => {
+        const p = priceMap[a.ticker];
+        const hasError = !priceMap[a.ticker];
+
+        if (hasError) {
+          missingCount++;
+          return {
+            ...a,
+            price: NaN,
+            prev: NaN,
+            valueEur: NaN,
+            prevEur: NaN,
+            dailyPnl: NaN,
+            dailyReturn: NaN,
+            hasError: true
+          };
+        }
+
+        const price = p?.price ?? 0;
+        const prev = p?.prev ?? price;
+        const valueEur = price * a.quantity;
+        const prevEur = prev * a.quantity;
+        totalValue += valueEur;
+        totalPrev += prevEur;
+        return { ...a, price, prev, valueEur, prevEur, dailyPnl: valueEur - prevEur, dailyReturn: prevEur > 0 ? ((valueEur - prevEur) / prevEur) * 100 : 0, hasError: false };
+      });
+
+      const totalPnl = totalValue - totalPrev;
+      const totalReturn = totalPrev > 0 ? (totalPnl / totalPrev) * 100 : 0;
+      const platformCount = new Set(assets.map(a => a.platform)).size;
+      const uniqueAssetClasses = new Set(enriched.map(a => a.asset_class)).size;
+
+      const stats = {
+        totalValue,
+        totalPnl,
+        totalReturn,
+        platformCount,
+        uniqueAssetClasses,
+        missingCount,
+        assetsCount: assets.length
+      };
+
+      return { enriched, stats };
+    }
+
+    function updateKPIs(stats) {
+      document.getElementById('totalValue').textContent = `€\u202f${Math.round(stats.totalValue).toLocaleString('fr-FR')}`;
+
+      const kpiSub1 = document.getElementById('kpiSub1');
+      kpiSub1.textContent = `${stats.assetsCount} positions · ${stats.platformCount} platforms`;
+      if (stats.missingCount > 0) {
+        const warning = el('span', 'warning', `⚠ ${stats.missingCount} position${stats.missingCount > 1 ? 's' : ''} missing price data`);
+        warning.style.cssText = 'color:var(--negative)';
+        kpiSub1.append(' · ', warning);
+      }
+
+      const pnlEl = document.getElementById('dailyPnl');
+      pnlEl.textContent = fmtSignWhole(stats.totalPnl);
+      pnlEl.className = `kpi-value ${stats.totalPnl >= 0 ? 'positive' : 'negative'}`;
+
+      const retEl = document.getElementById('dailyReturn');
+      retEl.textContent = `${(stats.totalReturn >= 0 ? '+ ' : '- ') + fmt(Math.abs(stats.totalReturn), 2)}%`;
+      retEl.className = `kpi-value ${stats.totalReturn >= 0 ? 'positive' : 'negative'}`;
+
+      document.getElementById('numAssets').textContent = stats.assetsCount;
+      document.getElementById('kpiSub4').textContent = `${stats.uniqueAssetClasses} asset classes`;
+      document.getElementById('lastUpdated').textContent = `Updated ${new Date().toLocaleTimeString('fr-FR')}`;
+    }
+
+    function updateCharts(enriched, targets, totalValue) {
+      const byClass = groupBy(enriched, 'asset_class', totalValue);
+      renderDonut('classChart', byClass.map(g => g.label), byClass.map(g => g.pct), byClass.map((l, i) => CLASS_COLORS[l.label] || PALETTE[i % PALETTE.length]));
+      renderLegend('classLegend', byClass.map(g => g.label), byClass.map(g => g.pct), byClass.map((l, i) => CLASS_COLORS[l.label] || PALETTE[i % PALETTE.length]));
+      document.getElementById('classCount').textContent = byClass.length;
+
+      const allClasses = [...new Set([...Object.keys(targets), ...byClass.map(g => g.label)])];
+      const actualPcts = allClasses.map(c => byClass.find(g => g.label === c)?.pct ?? 0);
+      const targetPcts = allClasses.map(c => (targets[c] ?? 0) * 100);
+      renderBarChart('targetChart', allClasses, actualPcts, targetPcts);
+
+      const byPlat = groupBy(enriched, 'platform', totalValue);
+      const plLabels = byPlat.map(g => g.label);
+      const plPcts = byPlat.map(g => g.pct);
+      const plColors = plLabels.map((_, i) => PALETTE[(i + 1) % PALETTE.length]);
+
+      renderDonut('platformChart', plLabels, plPcts, plColors);
+      renderLegend('platformLegend', plLabels, plPcts, plColors);
+      document.getElementById('platformCount').textContent = byPlat.length;
+
+      const byGeo = groupBy(enriched, 'geography', totalValue);
+      const gLabels = byGeo.map(g => g.label);
+      const gPcts = byGeo.map(g => g.pct);
+      const gColors = gLabels.map((_, i) => PALETTE[(i + 4) % PALETTE.length]);
+
+      renderDonut('geoChart', gLabels, gPcts, gColors);
+      renderLegend('geoLegend', gLabels, gPcts, gColors, true);
+      document.getElementById('geoCount').textContent = byGeo.length;
+    }
+
     function renderDonut(id, labels, pcts, colors) {
       if (charts[id]) {
         charts[id].data.labels = labels;
@@ -783,198 +902,13 @@
       sortAsc = false;
 
       try {
-        const pfRes = await fetch('/portfolio');
-        if (!pfRes.ok) throw new Error(`Cannot load portfolio.json (${pfRes.status})`);
-        const { assets, targets } = await pfRes.json();
-
-        const tickers = assets.map(a => a.ticker).join(',');
-        const types = assets.map(a => a.asset_class === 'Crypto' ? 'crypto' : 'etf').join(',');
-        const qRes = await fetch(`/quotes?tickers=${encodeURIComponent(tickers)}&types=${encodeURIComponent(types)}`);
-        if (!qRes.ok) throw new Error(`Quotes endpoint error (${qRes.status})`);
-        const quotes = await qRes.json();
-        const priceMap = {};
-        for (const q of quotes) if (!q.error) priceMap[q.ticker] = { price: q.priceEur, prev: q.previousCloseEur };
-
-        let totalValue = 0, totalPrev = 0;
-        let missingCount = 0;
-        const enriched = assets.map(a => {
-          const p = priceMap[a.ticker];
-          const hasError = !priceMap[a.ticker];
-
-          if (hasError) {
-            missingCount++;
-            return {
-              ...a,
-              price: NaN,
-              prev: NaN,
-              valueEur: NaN,
-              prevEur: NaN,
-              dailyPnl: NaN,
-              dailyReturn: NaN,
-              hasError: true
-            };
-          }
-
-          const price = p?.price ?? 0;
-          const prev = p?.prev ?? price;
-          const valueEur = price * a.quantity;
-          const prevEur = prev * a.quantity;
-          totalValue += valueEur;
-          totalPrev += prevEur;
-          return { ...a, price, prev, valueEur, prevEur, dailyPnl: valueEur - prevEur, dailyReturn: prevEur > 0 ? ((valueEur - prevEur) / prevEur) * 100 : 0, hasError: false };
-        });
-
-        const totalPnl = totalValue - totalPrev;
-        const totalReturn = totalPrev > 0 ? (totalPnl / totalPrev) * 100 : 0;
-
-        document.getElementById('totalValue').textContent = `€\u202f${Math.round(totalValue).toLocaleString('fr-FR')}`;
-        const platformCount = new Set(assets.map(a => a.platform)).size;
-        const kpiSub1 = document.getElementById('kpiSub1');
-        kpiSub1.textContent = `${assets.length} positions · ${platformCount} platforms`;
-        if (missingCount > 0) {
-          const warning = el('span', 'warning', `⚠ ${missingCount} position${missingCount > 1 ? 's' : ''} missing price data`);
-          warning.style.cssText = 'color:var(--negative)';
-          kpiSub1.append(' · ', warning);
-        }
-
-        const pnlEl = document.getElementById('dailyPnl');
-        pnlEl.textContent = fmtSignWhole(totalPnl);
-        pnlEl.className = `kpi-value ${totalPnl >= 0 ? 'positive' : 'negative'}`;
-
-        const retEl = document.getElementById('dailyReturn');
-        retEl.textContent = `${(totalReturn >= 0 ? '+ ' : '- ') + fmt(Math.abs(totalReturn), 2)}%`;
-        retEl.className = `kpi-value ${totalReturn >= 0 ? 'positive' : 'negative'}`;
-
-        document.getElementById('numAssets').textContent = assets.length;
-        const uniqueAssetClasses = new Set(enriched.map(a => a.asset_class)).size;
-        document.getElementById('kpiSub4').textContent = `${uniqueAssetClasses} asset classes`;
-        document.getElementById('lastUpdated').textContent = `Updated ${new Date().toLocaleTimeString('fr-FR')}`;
-
-        const byClass = groupBy(enriched, 'asset_class', totalValue);
-        renderDonut('classChart', byClass.map(g => g.label), byClass.map(g => g.pct), byClass.map((l, i) => CLASS_COLORS[l.label] || PALETTE[i % PALETTE.length]));
-        renderLegend('classLegend', byClass.map(g => g.label), byClass.map(g => g.pct), byClass.map((l, i) => CLASS_COLORS[l.label] || PALETTE[i % PALETTE.length]));
-        document.getElementById('classCount').textContent = byClass.length;
-
-        // ── Actual vs Target bar ───────────────────────────────────────────────
-        const allClasses = [...new Set([...Object.keys(targets), ...byClass.map(g => g.label)])];
-        const actualPcts = allClasses.map(c => byClass.find(g => g.label === c)?.pct ?? 0);
-        const targetPcts = allClasses.map(c => (targets[c] ?? 0) * 100);
-        renderBarChart('targetChart', allClasses, actualPcts, targetPcts);
-
-        // ── Platform donut ───────────────────────────────────────────────────
-        const byPlat = groupBy(enriched, 'platform', totalValue);
-        const plLabels = byPlat.map(g => g.label);
-        const plPcts = byPlat.map(g => g.pct);
-        const plColors = plLabels.map((_, i) => PALETTE[(i + 1) % PALETTE.length]);
-
-        renderDonut('platformChart', plLabels, plPcts, plColors);
-        renderLegend('platformLegend', plLabels, plPcts, plColors);
-        document.getElementById('platformCount').textContent = byPlat.length;
-
-        // ── Geography donut ───────────────────────────────────────────────────
-        const byGeo = groupBy(enriched, 'geography', totalValue);
-        const gLabels = byGeo.map(g => g.label);
-        const gPcts = byGeo.map(g => g.pct);
-        const gColors = gLabels.map((_, i) => PALETTE[(i + 4) % PALETTE.length]);
-
-        renderDonut('geoChart', gLabels, gPcts, gColors);
-        renderLegend('geoLegend', gLabels, gPcts, gColors, true);
-        document.getElementById('geoCount').textContent = byGeo.length;
+        const { assets, quotes, targets } = await fetchData();
+        const { enriched, stats } = processPortfolio(assets, quotes);
 
         enrichedData = enriched;
-
-        const renderTable = () => {
-          const tbody = document.getElementById('holdingsBody');
-          tbody.innerHTML = '';
-          const frag = document.createDocumentFragment();
-          const sorted = [...enriched].sort((a, b) => {
-            if (Number.isNaN(a.valueEur)) return 1;
-            if (Number.isNaN(b.valueEur)) return -1;
-            let va = a[sortKey], vb = b[sortKey];
-            if (typeof va === 'string') va = va.toLowerCase();
-            if (typeof vb === 'string') vb = vb.toLowerCase();
-            if (va < vb) return sortAsc ? -1 : 1;
-            if (va > vb) return sortAsc ? 1 : -1;
-            return b.valueEur - a.valueEur;
-          });
-          const sortLabel = document.querySelector(`th[data-sort="${sortKey}"]`)?.textContent
-            || { valueEur: 'value (€)', quantity: 'qty', dailyPnl: 'daily p&l', weight: 'weight' }[sortKey]
-            || sortKey;
-          document.getElementById('holdingsSubtitle').textContent =
-            `${sorted.length} positions · sorted by ${sortLabel.toLowerCase()} ${sortAsc ? '(asc)' : '(desc)'}`;
-
-          sorted.forEach(a => {
-            const weight = totalValue > 0 ? (a.valueEur / totalValue) * 100 : 0;
-            const clr = CLASS_COLORS[a.asset_class] || PALETTE[0];
-            const sign = a.dailyPnl >= 0 ? 'positive' : 'negative';
-
-            const tr = el('tr');
-
-            // Ticker with error warning
-            const tdTicker = el('td');
-            const tickerSpan = el('span', 'td-ticker', a.ticker.toUpperCase());
-            tdTicker.append(tickerSpan);
-            if (a.hasError) {
-              const errSpan = el('span', '', '⚠');
-              errSpan.title = 'Price unavailable';
-              errSpan.style.cssText = 'color:var(--negative);margin-left:4px';
-              tdTicker.append(errSpan);
-            }
-
-            // Name
-            const tdName = el('td', '', a.name);
-
-            // Class badge
-            const badge = el('span', 'badge', a.asset_class);
-            const brightness = getBrightness(clr);
-            const lighten = (hex, amount) => `#${[1, 3, 5].map(i => Math.min(255, parseInt(hex.slice(i, i + 2), 16) + amount).toString(16).padStart(2, '0')).join('')}`;
-            const textColor = brightness < 125 ? lighten(clr, 100) : clr;
-            const bgColor = brightness < 125 ? `${lighten(clr, 80)}33` : `${clr}1a`;
-            badge.style.cssText = `background:${bgColor};color:${textColor}`;
-            const tdClass = el('td', '', badge);
-
-            // Platform, Geography, Qty
-            const tdPlatform = el('td', '', a.platform);
-            const tdGeo = el('td', '', a.geography);
-            const qty = fmtQuantity(a.quantity);
-            const tdQty = el('td', 'r', qty);
-
-            // Price (show "—" if error)
-            const tdPrice = el('td', 'r', a.hasError ? '—' : fmtEur(a.price));
-
-            // Value (show "—" if error)
-            const tdValue = el('td', 'r');
-            tdValue.style.fontWeight = '700';
-            tdValue.textContent = a.hasError ? '—' : `€\u202f${Math.round(a.valueEur).toLocaleString('fr-FR')}`;
-
-            // Daily P&L (show "—" if error)
-            const pnlMain = el('div', a.hasError ? '' : sign, a.hasError ? '—' : fmtSign(a.dailyPnl));
-            const pnlSub = el('div', a.hasError ? '' : sign, a.hasError ? '—' : fmtPct(a.dailyReturn));
-            const tdPnl = el('td', 'r');
-            tdPnl.append(pnlMain, pnlSub);
-
-            // Weight (show "—" if error)
-            const tdWeight = el('td', 'r');
-            if (!a.hasError) {
-              const wFill = el('div', 'weight-bar-fill');
-              wFill.style.cssText = `width:${Math.min(weight, 100)}%;background:${clr}`;
-              const wBg = el('div', 'weight-bar-bg', wFill);
-              const wText = el('span', '', `${fmt(weight, 1)}%`);
-              const wWrap = el('div', 'weight-bar-wrap');
-              wWrap.append(wBg, wText);
-              tdWeight.append(wWrap);
-            } else {
-              tdWeight.textContent = '—';
-            }
-
-            tr.append(tdTicker, tdName, tdClass, tdPlatform, tdGeo, tdQty, tdPrice, tdValue, tdPnl, tdWeight);
-            frag.appendChild(tr);
-          });
-          tbody.appendChild(frag);
-        }
-
-        // Initial render
-        renderTable();
+        updateKPIs(stats);
+        updateCharts(enriched, targets, stats.totalValue);
+        renderTableFromData(enriched);
       } catch (e) { errEl.style.display = 'block'; errEl.textContent = `⚠  ${e.message}`; console.error(e); } finally { btn.disabled = false; btn.textContent = '↻ REFRESH'; }
     }
     document.getElementById('refreshBtn').addEventListener('click', loadAll);
@@ -988,16 +922,16 @@
           sortKey = key;
           sortAsc = true;
         }
-        renderTableFromData();
+        renderTableFromData(enrichedData);
       });
     });
 
-    function renderTableFromData() {
+    function renderTableFromData(enriched) {
       const tbody = document.getElementById('holdingsBody');
       tbody.innerHTML = '';
       const frag = document.createDocumentFragment();
-      const totalValue = enrichedData.reduce((sum, a) => sum + (a.valueEur || 0), 0);
-      const sorted = [...enrichedData].sort((a, b) => {
+      const totalValue = enriched.reduce((sum, a) => sum + (a.valueEur || 0), 0);
+      const sorted = [...enriched].sort((a, b) => {
         if (Number.isNaN(a.valueEur)) return 1;
         if (Number.isNaN(b.valueEur)) return -1;
         let va = a[sortKey], vb = b[sortKey];
