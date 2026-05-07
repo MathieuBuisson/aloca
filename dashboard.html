@@ -684,6 +684,34 @@
       return (r * 299 + g * 587 + b * 114) / 1000;
     };
     const lighten = (hex, amount) => `#${[1, 3, 5].map(i => Math.min(255, parseInt(hex.slice(i, i + 2), 16) + amount).toString(16).padStart(2, '0')).join('')}`;
+    const BADGE_COLORS = {};
+    for (const [assetClass, clr] of Object.entries(CLASS_COLORS)) {
+      const brightness = getBrightness(clr);
+      BADGE_COLORS[assetClass] = {
+        textColor: brightness < 125 ? lighten(clr, 100) : clr,
+        bgColor: brightness < 125 ? `${lighten(clr, 80)}33` : `${clr}1a`
+      };
+    }
+    const DOM = {
+      totalValue: document.getElementById('totalValue'),
+      kpiSub1: document.getElementById('kpiSub1'),
+      dailyPnl: document.getElementById('dailyPnl'),
+      dailyReturn: document.getElementById('dailyReturn'),
+      numAssets: document.getElementById('numAssets'),
+      kpiSub4: document.getElementById('kpiSub4'),
+      lastUpdated: document.getElementById('lastUpdated'),
+      classCount: document.getElementById('classCount'),
+      platformCount: document.getElementById('platformCount'),
+      geoCount: document.getElementById('geoCount'),
+      refreshBtn: document.getElementById('refreshBtn'),
+      errorBanner: document.getElementById('errorBanner'),
+      holdingsBody: document.getElementById('holdingsBody'),
+      holdingsSubtitle: document.getElementById('holdingsSubtitle'),
+      classChart: document.getElementById('classChart'),
+      platformChart: document.getElementById('platformChart'),
+      geoChart: document.getElementById('geoChart'),
+      targetChart: document.getElementById('targetChart')
+    };
     let sortKey = 'valueEur';
     let sortAsc = false;
     let enrichedData = [];
@@ -755,9 +783,9 @@
     }
 
     function updateKPIs(stats) {
-      document.getElementById('totalValue').textContent = `€\u202f${Math.round(stats.totalValue).toLocaleString('fr-FR')}`;
+      DOM.totalValue.textContent = `€\u202f${Math.round(stats.totalValue).toLocaleString('fr-FR')}`;
 
-      const kpiSub1 = document.getElementById('kpiSub1');
+      const kpiSub1 = DOM.kpiSub1;
       kpiSub1.textContent = `${stats.assetsCount} positions · ${stats.platformCount} platforms`;
       if (stats.missingCount > 0) {
         const warning = el('span', 'warning', `⚠ ${stats.missingCount} position${stats.missingCount > 1 ? 's' : ''} missing price data`);
@@ -765,24 +793,24 @@
         kpiSub1.append(' · ', warning);
       }
 
-      const pnlEl = document.getElementById('dailyPnl');
+      const pnlEl = DOM.dailyPnl;
       pnlEl.textContent = fmtSignWhole(stats.totalPnl);
       pnlEl.className = `kpi-value ${stats.totalPnl >= 0 ? 'positive' : 'negative'}`;
 
-      const retEl = document.getElementById('dailyReturn');
+      const retEl = DOM.dailyReturn;
       retEl.textContent = `${(stats.totalReturn >= 0 ? '+ ' : '- ') + fmt(Math.abs(stats.totalReturn), 2)}%`;
       retEl.className = `kpi-value ${stats.totalReturn >= 0 ? 'positive' : 'negative'}`;
 
-      document.getElementById('numAssets').textContent = stats.assetsCount;
-      document.getElementById('kpiSub4').textContent = `${stats.uniqueAssetClasses} asset classes`;
-      document.getElementById('lastUpdated').textContent = `Updated ${new Date().toLocaleTimeString('fr-FR')}`;
+      DOM.numAssets.textContent = stats.assetsCount;
+      DOM.kpiSub4.textContent = `${stats.uniqueAssetClasses} asset classes`;
+      DOM.lastUpdated.textContent = `Updated ${new Date().toLocaleTimeString('fr-FR')}`;
     }
 
     function updateCharts(enriched, targets, totalValue) {
       const byClass = groupBy(enriched, 'asset_class', totalValue);
       renderDonut('classChart', byClass.map(g => g.label), byClass.map(g => g.pct), byClass.map((l, i) => CLASS_COLORS[l.label] || PALETTE[i % PALETTE.length]));
       renderLegend('classLegend', byClass.map(g => g.label), byClass.map(g => g.pct), byClass.map((l, i) => CLASS_COLORS[l.label] || PALETTE[i % PALETTE.length]));
-      document.getElementById('classCount').textContent = byClass.length;
+      DOM.classCount.textContent = byClass.length;
 
       const allClasses = [...new Set([...Object.keys(targets), ...byClass.map(g => g.label)])];
       const actualPcts = allClasses.map(c => byClass.find(g => g.label === c)?.pct ?? 0);
@@ -796,7 +824,7 @@
 
       renderDonut('platformChart', plLabels, plPcts, plColors);
       renderLegend('platformLegend', plLabels, plPcts, plColors);
-      document.getElementById('platformCount').textContent = byPlat.length;
+      DOM.platformCount.textContent = byPlat.length;
 
       const byGeo = groupBy(enriched, 'geography', totalValue);
       const gLabels = byGeo.map(g => g.label);
@@ -892,8 +920,10 @@
       return Object.entries(map).sort(([, a], [, b]) => b - a).map(([label, value]) => ({ label, value, pct: total > 0 ? (value / total) * 100 : 0 }));
     }
 
+    let isRefreshing = false;
+
     async function loadAll() {
-      const btn = document.getElementById('refreshBtn');
+      const btn = DOM.refreshBtn;
       btn.disabled = true; btn.textContent = '↻ LOADING';
 
       const errEl = document.getElementById('errorBanner');
@@ -912,7 +942,11 @@
         renderTableFromData(enriched);
       } catch (e) { errEl.style.display = 'block'; errEl.textContent = `⚠  ${e.message}`; console.error(e); } finally { btn.disabled = false; btn.textContent = '↻ REFRESH'; }
     }
-    document.getElementById('refreshBtn').addEventListener('click', loadAll);
+    DOM.refreshBtn.addEventListener('click', () => {
+      if (isRefreshing) return;
+      isRefreshing = true;
+      loadAll().finally(() => isRefreshing = false);
+    });
 
     document.querySelectorAll('th[data-sort]').forEach(th => {
       th.addEventListener('click', () => {
@@ -968,10 +1002,8 @@
         const tdName = el('td', '', a.name);
 
         const badge = el('span', 'badge', a.asset_class);
-        const brightness = getBrightness(clr);
-        const textColor = brightness < 125 ? lighten(clr, 100) : clr;
-        const bgColor = brightness < 125 ? `${lighten(clr, 80)}33` : `${clr}1a`;
-        badge.style.cssText = `background:${bgColor};color:${textColor}`;
+        const badgeColors = BADGE_COLORS[a.asset_class] || { textColor: PALETTE[0], bgColor: `${PALETTE[0]}1a` };
+        badge.style.cssText = `background:${badgeColors.bgColor};color:${badgeColors.textColor}`;
         const tdClass = el('td', '', badge);
 
         const tdPlatform = el('td', '', a.platform);
