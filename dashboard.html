@@ -683,6 +683,9 @@
       const b = parseInt(hex.slice(5, 7), 16);
       return (r * 299 + g * 587 + b * 114) / 1000;
     };
+    let sortKey = 'valueEur';
+    let sortAsc = false;
+    let enrichedData = [];
     const charts = {};
     function destroyChart(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
 
@@ -692,7 +695,7 @@
       charts[id] = new Chart(ctx, {
         type: 'doughnut',
         data: { labels, datasets: [{ data: pcts, backgroundColor: colors, borderColor: '#1e2028', borderWidth: 2, hoverOffset: 8 }] },
-        options: { cutout: '78%', plugins: { legend: { display: false }, tooltip: { ...CHART_DEFAULTS.tooltip } }, animation: { duration: 800, easing: 'easeOutQuart' } }
+        options: { cutout: '70%', plugins: { legend: { display: false }, tooltip: { ...CHART_DEFAULTS.tooltip } }, animation: { duration: 800, easing: 'easeOutQuart' } }
       });
     }
 
@@ -763,9 +766,8 @@
       const errEl = document.getElementById('errorBanner');
       errEl.style.display = 'none';
 
-      // Sort state
-      let sortKey = 'valueEur';
-      let sortAsc = false;
+      sortKey = 'valueEur';
+      sortAsc = false;
 
       try {
         const pfRes = await fetch('/portfolio');
@@ -866,19 +868,7 @@
         renderLegend('geoLegend', gLabels, gPcts, gColors, true);
         document.getElementById('geoCount').textContent = byGeo.length;
 
-        // Sort handlers for headers
-        document.querySelectorAll('th[data-sort]').forEach(th => {
-          th.addEventListener('click', () => {
-            const key = th.dataset.sort;
-            if (sortKey === key) {
-              sortAsc = !sortAsc;
-            } else {
-              sortKey = key;
-              sortAsc = true;
-            }
-            renderTable();
-          });
-        });
+        enrichedData = enriched;
 
         const renderTable = () => {
           const tbody = document.getElementById('holdingsBody');
@@ -973,6 +963,101 @@
       } catch (e) { errEl.style.display = 'block'; errEl.textContent = `⚠  ${e.message}`; console.error(e); } finally { btn.disabled = false; btn.textContent = '↻ REFRESH'; }
     }
     document.getElementById('refreshBtn').addEventListener('click', loadAll);
+
+    document.querySelectorAll('th[data-sort]').forEach(th => {
+      th.addEventListener('click', () => {
+        const key = th.dataset.sort;
+        if (sortKey === key) {
+          sortAsc = !sortAsc;
+        } else {
+          sortKey = key;
+          sortAsc = true;
+        }
+        renderTableFromData();
+      });
+    });
+
+    function renderTableFromData() {
+      const tbody = document.getElementById('holdingsBody');
+      tbody.innerHTML = '';
+      const totalValue = enrichedData.reduce((sum, a) => sum + (a.valueEur || 0), 0);
+      const sorted = [...enrichedData].sort((a, b) => {
+        if (Number.isNaN(a.valueEur)) return 1;
+        if (Number.isNaN(b.valueEur)) return -1;
+        let va = a[sortKey], vb = b[sortKey];
+        if (typeof va === 'string') va = va.toLowerCase();
+        if (typeof vb === 'string') vb = vb.toLowerCase();
+        if (va < vb) return sortAsc ? -1 : 1;
+        if (va > vb) return sortAsc ? 1 : -1;
+        return b.valueEur - a.valueEur;
+      });
+      const sortLabel = document.querySelector(`th[data-sort="${sortKey}"]`)?.textContent
+        || { valueEur: 'value (€)', quantity: 'qty', dailyPnl: 'daily p&l', weight: 'weight' }[sortKey]
+        || sortKey;
+      document.getElementById('holdingsSubtitle').textContent =
+        `${sorted.length} positions · sorted by ${sortLabel.toLowerCase()} ${sortAsc ? '(asc)' : '(desc)'}`;
+
+      sorted.forEach(a => {
+        const weight = totalValue > 0 ? (a.valueEur / totalValue) * 100 : 0;
+        const clr = CLASS_COLORS[a.asset_class] || PALETTE[0];
+        const sign = a.dailyPnl >= 0 ? 'positive' : 'negative';
+
+        const tr = el('tr');
+
+        const tdTicker = el('td');
+        const tickerSpan = el('span', 'td-ticker', a.ticker.toUpperCase());
+        tdTicker.append(tickerSpan);
+        if (a.hasError) {
+          const errSpan = el('span', '', '⚠');
+          errSpan.title = 'Price unavailable';
+          errSpan.style.cssText = 'color:var(--negative);margin-left:4px';
+          tdTicker.append(errSpan);
+        }
+
+        const tdName = el('td', '', a.name);
+
+        const badge = el('span', 'badge', a.asset_class);
+        const brightness = getBrightness(clr);
+        const lighten = (hex, amount) => `#${[1, 3, 5].map(i => Math.min(255, parseInt(hex.slice(i, i + 2), 16) + amount).toString(16).padStart(2, '0')).join('')}`;
+        const textColor = brightness < 125 ? lighten(clr, 100) : clr;
+        const bgColor = brightness < 125 ? `${lighten(clr, 80)}33` : `${clr}1a`;
+        badge.style.cssText = `background:${bgColor};color:${textColor}`;
+        const tdClass = el('td', '', badge);
+
+        const tdPlatform = el('td', '', a.platform);
+        const tdGeo = el('td', '', a.geography);
+        const qty = fmtQuantity(a.quantity);
+        const tdQty = el('td', 'r', qty);
+
+        const tdPrice = el('td', 'r', a.hasError ? '—' : fmtEur(a.price));
+
+        const tdValue = el('td', 'r');
+        tdValue.style.fontWeight = '700';
+        tdValue.textContent = a.hasError ? '—' : `€\u202f${Math.round(a.valueEur).toLocaleString('fr-FR')}`;
+
+        const pnlMain = el('div', a.hasError ? '' : sign, a.hasError ? '—' : fmtSign(a.dailyPnl));
+        const pnlSub = el('div', a.hasError ? '' : sign, a.hasError ? '—' : fmtPct(a.dailyReturn));
+        const tdPnl = el('td', 'r');
+        tdPnl.append(pnlMain, pnlSub);
+
+        const tdWeight = el('td', 'r');
+        if (!a.hasError) {
+          const wFill = el('div', 'weight-bar-fill');
+          wFill.style.cssText = `width:${Math.min(weight, 100)}%;background:${clr}`;
+          const wBg = el('div', 'weight-bar-bg', wFill);
+          const wText = el('span', '', `${fmt(weight, 1)}%`);
+          const wWrap = el('div', 'weight-bar-wrap');
+          wWrap.append(wBg, wText);
+          tdWeight.append(wWrap);
+        } else {
+          tdWeight.textContent = '—';
+        }
+
+        tr.append(tdTicker, tdName, tdClass, tdPlatform, tdGeo, tdQty, tdPrice, tdValue, tdPnl, tdWeight);
+        tbody.appendChild(tr);
+      });
+    }
+
     loadAll();
   </script>
 </body>
