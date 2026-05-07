@@ -30,7 +30,7 @@ All values are normalized to EUR. The dashboard shows:
 
 - **Data**: `portfolio.json` — User-defined holdings with:
   - `assets[]` — ticker, name, quantity, asset_class, platform, geography
-  - `targets` — target weights per asset class (0-1, should sum to 1)
+  - `targets` — target allocations per asset class (0-1, should sum to 1)
 
 ## Repository layout
 
