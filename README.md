@@ -1,6 +1,8 @@
 # Portfolio Dashboard
 
 A local portfolio dashboard with real-time prices from Yahoo Finance (ETFs) and CoinGecko (crypto). All values normalized to EUR.
+Here is how it looks with an example portfolio :
+<img width="2048" height="1152" alt="example-screenshot" src="https://github.com/user-attachments/assets/ed48d934-a2b0-4fc1-af9d-984b980c94e4" />
 
 ## Prerequisites
 
@@ -40,7 +42,7 @@ Each asset needs:
 | `platform`    | Broker/exchange name (e.g. `DEGIRO`, `Coinbase`) |
 | `geography`   | Manual exposure tag (e.g. `Global`, `US`, `Europe`, `Emerging Markets`) |
 
-The `targets` object maps asset class → target portfolio weight (0–1, should sum to 1).
+The `targets` object maps asset class → target portfolio allocation (0–1, should sum to 1).
 
 **Crypto auto-detection:** any asset with `asset_class: "Crypto"` is fetched from CoinGecko (use CoinGecko coin IDs like `bitcoin`, `ethereum`, `solana`). All others are fetched from Yahoo Finance with automatic EUR conversion.
 
