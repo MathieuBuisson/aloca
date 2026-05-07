@@ -2,8 +2,7 @@
 
 A local portfolio dashboard with real-time prices from Yahoo Finance (ETFs) and CoinGecko (crypto). All values normalized to EUR.
 Here is how it looks with an example portfolio :
-<img width="1920" height="1080" alt="example-screenshot" src="https://github.com/user-attachments/assets/91740950-cd0b-4668-a124-3989492d1f0c" />
-
+<img width="1898" height="1076" alt="example-screenshot" src="https://github.com/user-attachments/assets/6b8d056a-637e-4848-9731-45d9955b902d" />
 
 ## Prerequisites
 
