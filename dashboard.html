@@ -340,8 +340,8 @@
     }
 
     .legend-dot {
-      width: 8px;
-      height: 8px;
+      width: 11px;
+      height: 11px;
       border-radius: 2px;
       flex-shrink: 0;
     }
@@ -376,9 +376,8 @@
       text-align: left;
       padding: 0 16px 16px;
       font-family: var(--font-m);
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
+      font-size: 13px;
+      letter-spacing: 0.07em;
       color: var(--muted);
     }
 
@@ -397,10 +396,10 @@
 
     td {
       background: rgba(255, 255, 255, 0.01);
-      padding: 16px;
+      padding: 4px;
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
-      font-size: 13px;
+      font-size: 15px;
     }
 
     td:first-child {
@@ -628,16 +627,22 @@
 
   <script>
       const CLASS_COLORS = {
-        'Equities': '#cbd5e1',    /* Misty Slate */
-        'Bonds': '#94a3b8',       /* Medium Slate */
-        'Real Estate': '#2ec4b6', /* Deep Teal */
-        'Crypto': '#7dd3fc',      /* Ice Cyan */
-        'Cash': '#475569'         /* Dark Slate */
+        'Equities': '#7BA7F5',    /* Wisteria Blue */
+        'Bonds': '#FB923C',       /* Dark Orange */
+        'Real Estate': '#2ec4b6', /* Light Sea Green */
+        'Crypto': '#7dd3fc',      /* Frozen Lake */
+        'Cash': '#FDBA74'         /* Light Caramel */
       };
       const PALETTE = [
-        '#cbd5e1', '#7dd3fc', '#2ec4b6', '#94a3b8',
-        '#99f6e4', '#bae6fd', '#34d399', '#64748b',
-        '#475569', '#cfd8dc'
+        '#cbd5e1',  /* Pale Slate */
+        '#7dd3fc',  /* Frozen Lake */
+        '#2ec4b6',  /* Light Sea Green */
+        '#99f6e4',  /* Soft Cyan */
+        '#7BA7F5',  /* Wisteria Blue */
+        '#FCD34D',  /* Mustard */
+        '#FDBA74',  /* Light Caramel*/
+        '#475569',  /* Blue Slate */
+        '#FB923C'   /* Dark Orange */
       ];
       const CHART_DEFAULTS = {
       tooltip: {
@@ -710,14 +715,14 @@
           scales: {
             y: {
               grid: { color: 'rgba(203, 213, 225, 0.05)' }, // Subtle Misty Slate grid
-              ticks: { 
+              ticks: {
   color: '#94a3b8',
   font: { family: "'DM Mono', monospace", size: 15 }
 }
             },
             x: {
               grid: { display: false },
-              ticks: { 
+              ticks: {
                 color: '#a6a69a',
                 font: { family: "'DM Mono', monospace", size: 15 }
               }
