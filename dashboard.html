@@ -683,6 +683,7 @@
       const b = parseInt(hex.slice(5, 7), 16);
       return (r * 299 + g * 587 + b * 114) / 1000;
     };
+    const lighten = (hex, amount) => `#${[1, 3, 5].map(i => Math.min(255, parseInt(hex.slice(i, i + 2), 16) + amount).toString(16).padStart(2, '0')).join('')}`;
     let sortKey = 'valueEur';
     let sortAsc = false;
     let enrichedData = [];
@@ -968,7 +969,6 @@
 
         const badge = el('span', 'badge', a.asset_class);
         const brightness = getBrightness(clr);
-        const lighten = (hex, amount) => `#${[1, 3, 5].map(i => Math.min(255, parseInt(hex.slice(i, i + 2), 16) + amount).toString(16).padStart(2, '0')).join('')}`;
         const textColor = brightness < 125 ? lighten(clr, 100) : clr;
         const bgColor = brightness < 125 ? `${lighten(clr, 80)}33` : `${clr}1a`;
         badge.style.cssText = `background:${bgColor};color:${textColor}`;
